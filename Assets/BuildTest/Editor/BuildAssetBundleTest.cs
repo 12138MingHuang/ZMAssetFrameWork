@@ -14,7 +14,7 @@ public class BuildAssetBundleTest : Editor
         }
     }
 
-    [MenuItem("ZMFrame/BuildAssetBundle")]
+    [MenuItem("ZMAssetFrameWork/BuildAssetBundle")]
     public static void BuildAssetBundle()
     {
         if (!Directory.Exists(BundleOutPutPath))
