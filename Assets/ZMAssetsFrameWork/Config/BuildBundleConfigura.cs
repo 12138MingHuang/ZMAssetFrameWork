@@ -8,7 +8,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "AssetBundle", fileName = "BuildBundleConfigura", order = 4)]
 public class BuildBundleConfigura : ScriptableObject
 {
-    public static BuildBundleConfigura _instance;
+    private static BuildBundleConfigura _instance;
     public static BuildBundleConfigura Instance
     {
         get
