@@ -13,7 +13,7 @@ public class BuildWindow : OdinMenuEditorWindow
     public static void ShowAssetBundleWindow()
     {
         BuildWindow window = GetWindow<BuildWindow>();
-        window.position = GUIHelper.GetEditorWindowRect().AlignCenter(958, 612);
+        window.position = GUIHelper.GetEditorWindowRect().AlignCenter(985, 612);
         window.ForceMenuTreeRebuild();
     }
 
