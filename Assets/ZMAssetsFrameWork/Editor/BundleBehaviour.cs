@@ -103,7 +103,18 @@ public class BundleBehaviour
             //绘制添加资源模块按钮
             if(rowModuleDataList.Count - 1 == i)
             {
-                this.DrawAddModuleButton();
+                if (6 == rowModuleDataList[i].Count)
+                {
+                    // 开始横向绘制
+                    GUILayout.BeginHorizontal();
+                    this.DrawAddModuleButton();
+                    // 结束横向绘制
+                    GUILayout.EndHorizontal();
+                }
+                else
+                {
+                    this.DrawAddModuleButton();
+                }
             }
             
             // 结束横向绘制

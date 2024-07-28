@@ -2,6 +2,7 @@ using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class BundleModuleConfigWindow : OdinEditorWindow
@@ -48,6 +49,84 @@ public class BundleModuleConfigWindow : OdinEditorWindow
     {
         BundleModuleConfigWindow window = GetWindowWithRect<BundleModuleConfigWindow>(new Rect(0, 0, 600, 600));
         window.Show();
-        //更新窗口数据
+        // 更新窗口数据
+        BundleModuleData moduleData = BuildBundleConfigura.Instance.GetBundleDataByName(moduleName: moduleName);
+        if (moduleData != null)
+        {
+            window.moduleName = moduleName;
+            window.prefabPathArr = moduleData.prefabPathArr;
+            window.rootFolderPathArr = moduleData.rootFolderPathArr;
+            window.signFolderPathArr = moduleData.signFolderPathArr;
+        }
+    }
+
+    [OnInspectorGUI]
+    public void DrawSaveConfigaurButton()
+    {
+        // 绘制保存配置按钮
+        if (GUILayout.Button("Save Config", GUILayout.Height(47)))
+        {
+            SaveConfiguration();
+        }
+
+        // 绘制删除配置按钮
+        if (GUILayout.Button("Delete Config", GUILayout.Height(47)))
+        {
+            bool confirmDelete = EditorUtility.DisplayDialog("确认删除", "是否确认删除该配置？", "确认", "取消");
+            if (confirmDelete)
+            {
+                DeleteConfiguration();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 删除资源模块配置
+    /// </summary>
+    private void DeleteConfiguration()
+    {
+        BuildBundleConfigura.Instance.RemoveModuleByName(moduleName: moduleName);
+        EditorUtility.DisplayDialog("删除成功", "配置已经删除", "确定");
+        Close();
+        BuildWindow.ShowAssetBundleWindow();
+        GUIUtility.ExitGUI(); // 退出当前GUI执行
+    }
+    
+    /// <summary>
+    /// 存储资源模块配置
+    /// </summary>
+    private void SaveConfiguration()
+    {
+        if (string.IsNullOrEmpty(moduleName))
+        {
+            EditorUtility.DisplayDialog("保存失败", "资源模块名称不能为空", "确定");
+            return;
+        }
+        
+        BundleModuleData moduleData = BuildBundleConfigura.Instance.GetBundleDataByName(moduleName: moduleName);
+
+        if (moduleData == null)
+        {
+            // 添加新的模块资源
+            moduleData = new BundleModuleData
+            {
+                moduleName = moduleName,
+                prefabPathArr = prefabPathArr,
+                rootFolderPathArr = rootFolderPathArr,
+                signFolderPathArr = signFolderPathArr
+            };
+            BuildBundleConfigura.Instance.SaveModuleData(moduleData);
+        }
+        else
+        {
+            // 更新模块资源
+            moduleData.prefabPathArr = prefabPathArr;
+            moduleData.rootFolderPathArr = rootFolderPathArr;
+            moduleData.signFolderPathArr = signFolderPathArr;
+        }
+        EditorUtility.DisplayDialog("保存成功!", "配置已经保存", "确定");
+        Close();
+        BuildWindow.ShowAssetBundleWindow();
+        GUIUtility.ExitGUI(); // 退出当前GUI执行
     }
 }

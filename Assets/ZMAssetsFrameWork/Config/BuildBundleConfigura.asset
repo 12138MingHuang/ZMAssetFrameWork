@@ -12,4 +12,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3860acc2c174cecaffa87681b3d0efc, type: 3}
   m_Name: BuildBundleConfigura
   m_EditorClassIdentifier: 
-  AssetBundleConfig: []
+  AssetBundleConfig:
+  - bundleId: 0
+    moduleName: rrr
+    isBuild: 1
+    lastClickBtnTime: 18497.236
+    prefabPathArr: []
+    rootFolderPathArr: []
+    signFolderPathArr: []
+  - bundleId: 0
+    moduleName: ttt
+    isBuild: 0
+    lastClickBtnTime: 0
+    prefabPathArr: []
+    rootFolderPathArr: []
+    signFolderPathArr: []
+  - bundleId: 0
+    moduleName: yyy
+    isBuild: 0
+    lastClickBtnTime: 0
+    prefabPathArr: []
+    rootFolderPathArr: []
+    signFolderPathArr: []
+  - bundleId: 0
+    moduleName: uuu
+    isBuild: 0
+    lastClickBtnTime: 0
+    prefabPathArr: []
+    rootFolderPathArr: []
+    signFolderPathArr: []
+  - bundleId: 0
+    moduleName: iii
+    isBuild: 0
+    lastClickBtnTime: 0
+    prefabPathArr: []
+    rootFolderPathArr: []
+    signFolderPathArr: []
+  - bundleId: 0
+    moduleName: ooo
+    isBuild: 0
+    lastClickBtnTime: 0
+    prefabPathArr: []
+    rootFolderPathArr: []
+    signFolderPathArr: []
+  - bundleId: 0
+    moduleName: vvv
+    isBuild: 0
+    lastClickBtnTime: 0
+    prefabPathArr:
+    - Path...
+    rootFolderPathArr: []
+    signFolderPathArr: []
