@@ -85,9 +85,9 @@ public class BundleBehaviour
                     {
                         //双击处理逻辑
                         Debug.Log("双击");
-                        // bundleModuleData.isBuild = !bundleModuleData.isBuild;
-                        // bundleModuleData.lastClickBtnTime = Time.realtimeSinceStartup;
+                        BundleModuleConfigWindow.ShowWindow(bundleModuleData.moduleName);
                     }
+                    bundleModuleData.lastClickBtnTime = Time.realtimeSinceStartup;
                 }
                 GUI.Label(new Rect((j + 1) * 20 + (j * 112), 150 * (i + 1) + (i * 20), 115, 20), bundleModuleData.moduleName, new GUIStyle() { alignment = TextAnchor.MiddleCenter });
 

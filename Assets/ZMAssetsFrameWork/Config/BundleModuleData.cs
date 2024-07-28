@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,4 +16,15 @@ public class BundleModuleData
     //上一次点击按钮的时间
     public float lastClickBtnTime;
 
+}
+
+[System.Serializable]
+public class BundleFileInfo
+{
+    [HideLabel]
+    public string abName = "AB Name...";
+    
+    [HideLabel]
+    [FolderPath]
+    public string bundlePath = "BundlePath...";
 }
