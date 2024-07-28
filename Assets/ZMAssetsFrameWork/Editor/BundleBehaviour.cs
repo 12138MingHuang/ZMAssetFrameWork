@@ -65,7 +65,7 @@ public class BundleBehaviour
 
         //获取Unity Logo
         GUIContent content = EditorGUIUtility.IconContent("SceneAsset Icon".Trim(), "测试文字显示");
-        content.tooltip = "单击可选中火取消\n快速点击可打开配置窗口";
+        content.tooltip = "单击可选中或取消\n快速点击可打开配置窗口";
 
         // 遍历行配置列表，并绘制按钮展示模块配置
         for (int i = 0; i < rowModuleDataList.Count; i++)

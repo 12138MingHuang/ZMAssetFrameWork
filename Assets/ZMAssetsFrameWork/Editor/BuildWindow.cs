@@ -9,6 +9,9 @@ public class BuildWindow : OdinMenuEditorWindow
     [SerializeField]
     public BuildBundleWindow buildBundleWindow = new BuildBundleWindow();
     
+    [SerializeField]
+    public BuildHotPatchWindow buildHotPatchWindow = new BuildHotPatchWindow();
+    
     [MenuItem("ZMAssetFrameWork/BuildAssetBundleWindow")]
     public static void ShowAssetBundleWindow()
     {
@@ -20,6 +23,7 @@ public class BuildWindow : OdinMenuEditorWindow
     protected override OdinMenuTree BuildMenuTree()
     {
         buildBundleWindow.Initialization();
+        buildHotPatchWindow.Initialization();
         OdinMenuTree menuTree = new OdinMenuTree(supportsMultiSelect: false)
         {
             {
@@ -28,6 +32,9 @@ public class BuildWindow : OdinMenuEditorWindow
             {
                 "Build/AssetBundle", buildBundleWindow, EditorIcons.UnityLogo
             },
+            {
+                "Build/HotPatch", buildHotPatchWindow, EditorIcons.UnityLogo
+            }
         };
         return menuTree;
     }
