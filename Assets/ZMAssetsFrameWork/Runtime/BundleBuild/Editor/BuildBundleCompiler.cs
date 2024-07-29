@@ -257,9 +257,96 @@ namespace ZMAssetsFrameWork
         /// </summary>
         private static void BuildAllAssetBundle()
         {
+            //修改所有要打包的文件的AssetBundleName
+            ModifyAllFileBundleName();
+            //生成一份AssetBundle打包配置
+            WriteAssetBundleConfig();
+            //调用UnityAPI打包AssetBundle
             
+            
+            // ModifyAllFileBundleName(true);
+            EditorUtility.ClearProgressBar();
         }
 
+        /// <summary>
+        /// 修改或清空AssetBundle
+        /// </summary>
+        private static void ModifyAllFileBundleName(bool isClear = false)
+        {
+            int i = 0;
+            
+            //修改所有文件夹下的AssetBundle name
+            foreach (var item in _allFolderBundleDic)
+            {
+                i++;
+                EditorUtility.DisplayProgressBar("Modify AssetBundle Name", "Name:" + item.Key, i * 1.0f / _allFolderBundleDic.Count);
+                foreach (string path in item.Value)
+                {
+                    AssetImporter assetImporter = AssetImporter.GetAtPath(path);
+                    if (assetImporter != null)
+                    {
+                        // assetImporter.assetBundleName = isClear ? "" : item.Key;
+                        assetImporter.assetBundleName = isClear ? "" : item.Key + ".unity";
+                    }
+                }
+            }
+            
+            //修改所有预制体下的AssetBundle name
+            i = 0;
+            foreach (var item in _allPrefabsBundleDic)
+            {
+                i++;
+                List<string> dependsList = item.Value;
+                foreach (string path in dependsList)
+                {
+                    EditorUtility.DisplayProgressBar("Modify AssetBundle Name", "Name:" + item.Key, i * 1.0f / _allPrefabsBundleDic.Count);
+                    AssetImporter assetImporter = AssetImporter.GetAtPath(path);
+                    if (assetImporter != null)
+                    {
+                        // assetImporter.assetBundleName = isClear ? "" : item.Key;
+                        assetImporter.assetBundleName = isClear ? "" : item.Key + ".unity";
+                    }
+                }
+            }
+            
+            //移除未使用的AssetBundleName
+            if (isClear)
+            {
+                AssetDatabase.RemoveUnusedAssetBundleNames();
+            }
+        }
+
+        /// <summary>
+        /// 生成AssetBundle配置文件
+        /// </summary>
+        private static void WriteAssetBundleConfig()
+        {
+            BundleConfig bundleConfig = new BundleConfig();
+            bundleConfig.bundleInfoList = new List<BundleInfo>();
+            //所有AssetBundle文件字典 key:路径 value:AssetBundleName
+            Dictionary<string, string> allBundleFilePathDic = new Dictionary<string, string>();
+            //获取到工程内所有的AssetBundleName
+            string[] allBundleNameArr = AssetDatabase.GetAllAssetBundleNames();
+            
+            //遍历所有AssetBundleName
+            foreach (string bundleName in allBundleNameArr)
+            {
+                //获取指定的AssetBundleName下的所有文件路径
+                string[] bundleFileArr = AssetDatabase.GetAssetPathsFromAssetBundle(bundleName);
+                
+                //遍历所有文件路径
+                foreach (string filePath in bundleFileArr)
+                {
+                    if(!filePath.EndsWith(".cs"))
+                    {
+                        allBundleFilePathDic.Add(filePath, bundleName);
+                    }
+                }
+            }
+            
+            //计算AssetBundle数据，生成AssetBundle配置文件
+        }
+        
         /// <summary>
         /// 是否重复的Bundle文件
         /// </summary>
