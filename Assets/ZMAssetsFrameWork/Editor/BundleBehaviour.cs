@@ -24,6 +24,11 @@ public class BundleBehaviour
     /// 当前平台。
     /// </summary>
     protected string curPlatfam;
+    
+    /// <summary>
+    /// 当前选中的模块配置
+    /// </summary>
+    protected List<BundleModuleData> selectedModuleDataList;
 
     /// <summary>
     /// 初始化方法，用于获取模块配置列表并构建行配置列表。
@@ -33,6 +38,7 @@ public class BundleBehaviour
         // 获取多模块配置列表
         moduleDataList = BuildBundleConfigura.Instance.AssetBundleConfig;
         rowModuleDataList = new List<List<BundleModuleData>>();
+        selectedModuleDataList = new List<BundleModuleData>();
 
         // 遍历模块配置列表，计算模块绘制行数索引，并创建行配置列表
         for (int i = 0; i < moduleDataList.Count; i++)
@@ -61,6 +67,12 @@ public class BundleBehaviour
         if (rowModuleDataList == null)
         {
             return;
+        }
+        
+        Event e = Event.current;
+        if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Delete)
+        {
+            DeleteSelectedModule();
         }
 
         //获取Unity Logo
@@ -97,6 +109,12 @@ public class BundleBehaviour
                     GUIStyle guiStyle = UnityEditorUility.GetGUIStyle("LightmapEditorSelectedHighlight");
                     guiStyle.contentOffset = new Vector2(100, -70);
                     GUI.Toggle(new Rect(10 + (j * 133), -160 + 1 * (i + 1) + ((i + 1) * 170), 120, 160), true, EditorGUIUtility.IconContent("Collab"), guiStyle);
+                    
+                    selectedModuleDataList.Add(bundleModuleData);
+                }
+                else
+                {
+                    selectedModuleDataList.Remove(bundleModuleData);
                 }
             }
             
@@ -154,5 +172,28 @@ public class BundleBehaviour
     public virtual void DrawAddModuleButton()
     {
         
+    }
+    
+    /// <summary>
+    /// 删除选中的模块配置实例方法。
+    /// </summary>
+    public virtual void DeleteSelectedModule()
+    {
+        if (selectedModuleDataList.Count > 0)
+        {
+            foreach (BundleModuleData moduleData in selectedModuleDataList)
+            {
+                moduleDataList.Remove(moduleData);
+            }
+            
+            rowModuleDataList.Clear();
+            selectedModuleDataList.Clear();
+            Initialization(); // 重新初始化以更新显示
+            Debug.Log("选中的配置已删除");
+        }
+        else
+        {
+            Debug.LogWarning("没有选中的配置");
+        }
     }
 }
