@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using ZMAssetsFrameWork;
 
 public class BuildBundleWindow : BundleBehaviour
 {
@@ -72,7 +73,7 @@ public class BuildBundleWindow : BundleBehaviour
         {
             if (item.isBuild)
             {
-                // TODO 编写打包代码
+                BuildBundleCompiler.BuildAssetBundle(item, BuildType.AssetsBundle);
             }
         }
     }
