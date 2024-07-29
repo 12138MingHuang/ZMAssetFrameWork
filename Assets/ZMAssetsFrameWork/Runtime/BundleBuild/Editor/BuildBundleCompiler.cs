@@ -234,10 +234,10 @@ namespace ZMAssetsFrameWork
                     {
                         string dependPath = dependsArr[j];
                         //如果不是冗余文件，就归纳进行打包
-                        if (!IsRepeatBundleFile(filePath))
+                        if (!IsRepeatBundleFile(dependPath))
                         {
-                            _allBundlePathList.Add(filePath);
-                            dependsList.Add(filePath);
+                            _allBundlePathList.Add(dependPath);
+                            dependsList.Add(dependPath);
                         }
                     }
                     if (!_allPrefabsBundleDic.ContainsKey(bundleName))
