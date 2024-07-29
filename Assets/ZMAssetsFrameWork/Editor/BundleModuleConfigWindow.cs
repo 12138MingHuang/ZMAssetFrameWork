@@ -61,7 +61,7 @@ public class BundleModuleConfigWindow : OdinEditorWindow
     }
 
     [OnInspectorGUI]
-    public void DrawSaveConfigaurButton()
+    public void DrawSaveConfiguraButton()
     {
         // 绘制保存配置按钮
         if (GUILayout.Button("Save Config", GUILayout.Height(47)))
