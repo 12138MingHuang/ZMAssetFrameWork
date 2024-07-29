@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
 using UnityEngine;
 using ZMAssetFrameWork;
 
@@ -144,7 +146,64 @@ namespace ZMAssetsFrameWork
         /// </summary>
         private static void BuildRootSubFolder()
         {
-            
+            //检测父文件夹是否有配置，如果没有就直接跳过
+            if (_bundleModuleData.rootFolderPathArr == null || _bundleModuleData.rootFolderPathArr.Length == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _bundleModuleData.rootFolderPathArr.Length; i++)
+            {
+                string path = _bundleModuleData.rootFolderPathArr[i] + "/";
+                //获取父文件夹的子文件夹
+                string[] subFolderArr = Directory.GetDirectories(path);
+                foreach (string item in subFolderArr)
+                {
+                    path = item.Replace(@"\", "/");
+                    int nameIndex = path.LastIndexOf("/") + 1;
+                    //获取文件夹同名的AssetBundle名称
+                    string bundleName = GenerateBundleName(path.Substring(nameIndex, path.Length - nameIndex));
+                    if (!IsRepeatBundleFile(path))
+                    {
+                        _allBundlePathList.Add(path);
+                        if(!_allFolderBundleDic.ContainsKey(bundleName))
+                        {
+                            _allFolderBundleDic.Add(bundleName, new List<string>() { path });
+                        }
+                        else
+                        {
+                            _allFolderBundleDic[bundleName].Add(path);
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("重复的Bundle文件：" + path);
+                    }
+                    
+                    //处理子文件夹资源
+                    string[] subFilePahArr = Directory.GetFiles(path, "*");
+                    foreach (string subFilePath in subFilePahArr)
+                    {
+                        //过滤.meta文件
+                        if (!subFilePath.EndsWith(".meta"))
+                        {
+                            string abFilePath = subFilePath.Replace(@"\", "/");
+                            if (!IsRepeatBundleFile(abFilePath))
+                            {
+                                _allBundlePathList.Add(abFilePath);
+                                if (!_allFolderBundleDic.ContainsKey(bundleName))
+                                {
+                                    _allFolderBundleDic.Add(bundleName, new List<string>() { abFilePath });
+                                }
+                                else
+                                {
+                                    _allFolderBundleDic[bundleName].Add(abFilePath);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -152,7 +211,45 @@ namespace ZMAssetsFrameWork
         /// </summary>
         private static void BuildAllPrefabs()
         {
+            if(_bundleModuleData.prefabPathArr == null || _bundleModuleData.prefabPathArr.Length == 0)
+            {
+                return;
+            }
             
+            //获取所有预制体的GUID
+            string[] guidArr = AssetDatabase.FindAssets("t:Prefab", _bundleModuleData.prefabPathArr);
+
+            for (int i = 0; i < guidArr.Length; i++)
+            {
+                string filePath = AssetDatabase.GUIDToAssetPath(guidArr[i]);
+                //计算AssetBundle名称
+                string bundleName = GenerateBundleName(Path.GetFileNameWithoutExtension(filePath));
+                //如果该AssetBundle不存在，就计算打包数据
+                if (!_allBundlePathList.Contains(filePath))
+                {
+                    //获取预制体所有依赖项
+                    string[] dependsArr = AssetDatabase.GetDependencies(filePath);
+                    List<string> dependsList = new List<string>();
+                    for (int j = 0; j < dependsArr.Length; j++)
+                    {
+                        string dependPath = dependsArr[j];
+                        //如果不是冗余文件，就归纳进行打包
+                        if (!IsRepeatBundleFile(filePath))
+                        {
+                            _allBundlePathList.Add(filePath);
+                            dependsList.Add(filePath);
+                        }
+                    }
+                    if (!_allPrefabsBundleDic.ContainsKey(bundleName))
+                    {
+                        _allPrefabsBundleDic.Add(bundleName, dependsList);
+                    }
+                    else
+                    {
+                        Debug.LogError("重复的预制体名字，当前模块下有预制体文件重复：" + bundleName);
+                    }
+                }
+            }
         }
 
         /// <summary>
