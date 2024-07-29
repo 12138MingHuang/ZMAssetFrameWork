@@ -13,53 +13,14 @@ MonoBehaviour:
   m_Name: BuildBundleConfigura
   m_EditorClassIdentifier: 
   AssetBundleConfig:
-  - bundleId: 0
-    moduleName: rrr
-    isBuild: 1
-    lastClickBtnTime: 18497.236
-    prefabPathArr: []
-    rootFolderPathArr: []
-    signFolderPathArr: []
-  - bundleId: 0
-    moduleName: ttt
+  - bundleId: 1
+    moduleName: Game
     isBuild: 0
-    lastClickBtnTime: 0
-    prefabPathArr: []
-    rootFolderPathArr: []
-    signFolderPathArr: []
-  - bundleId: 0
-    moduleName: yyy
-    isBuild: 0
-    lastClickBtnTime: 0
-    prefabPathArr: []
-    rootFolderPathArr: []
-    signFolderPathArr: []
-  - bundleId: 0
-    moduleName: uuu
-    isBuild: 0
-    lastClickBtnTime: 0
-    prefabPathArr: []
-    rootFolderPathArr: []
-    signFolderPathArr: []
-  - bundleId: 0
-    moduleName: iii
-    isBuild: 0
-    lastClickBtnTime: 0
-    prefabPathArr: []
-    rootFolderPathArr: []
-    signFolderPathArr: []
-  - bundleId: 0
-    moduleName: ooo
-    isBuild: 0
-    lastClickBtnTime: 0
-    prefabPathArr: []
-    rootFolderPathArr: []
-    signFolderPathArr: []
-  - bundleId: 0
-    moduleName: vvv
-    isBuild: 0
-    lastClickBtnTime: 0
+    lastClickBtnTime: 100235.41
     prefabPathArr:
-    - Path...
-    rootFolderPathArr: []
-    signFolderPathArr: []
+    - Assets/BuildBundleDemo/Prefab/Window
+    rootFolderPathArr:
+    - Assets/BuildBundleDemo/Texture
+    signFolderPathArr:
+    - abName: ab1
+      bundlePath: Assets/Scenes
