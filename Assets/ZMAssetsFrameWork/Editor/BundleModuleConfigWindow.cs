@@ -45,18 +45,33 @@ public class BundleModuleConfigWindow : OdinEditorWindow
     [LabelText("单个补丁包资源路径配置")]
     public BundleFileInfo[] signFolderPathArr = new BundleFileInfo[] { };
     
+    // 新增标志位，用于控制是否显示删除按钮
+    private bool isNewModule;
+
     public static void ShowWindow(string moduleName)
     {
         BundleModuleConfigWindow window = GetWindowWithRect<BundleModuleConfigWindow>(new Rect(0, 0, 600, 600));
         window.Show();
         // 更新窗口数据
-        BundleModuleData moduleData = BuildBundleConfigura.Instance.GetBundleDataByName(moduleName: moduleName);
-        if (moduleData != null)
+        if (string.IsNullOrEmpty(moduleName))
         {
-            window.moduleName = moduleName;
-            window.prefabPathArr = moduleData.prefabPathArr;
-            window.rootFolderPathArr = moduleData.rootFolderPathArr;
-            window.signFolderPathArr = moduleData.signFolderPathArr;
+            window.isNewModule = true;
+            window.moduleName = string.Empty;
+            window.prefabPathArr = new string[] { "Path..." };
+            window.rootFolderPathArr = new string[] { };
+            window.signFolderPathArr = new BundleFileInfo[] { };
+        }
+        else
+        {
+            window.isNewModule = false;
+            BundleModuleData moduleData = BuildBundleConfigura.Instance.GetBundleDataByName(moduleName: moduleName);
+            if (moduleData != null)
+            {
+                window.moduleName = moduleName;
+                window.prefabPathArr = moduleData.prefabPathArr;
+                window.rootFolderPathArr = moduleData.rootFolderPathArr;
+                window.signFolderPathArr = moduleData.signFolderPathArr;
+            }
         }
     }
 
@@ -64,13 +79,17 @@ public class BundleModuleConfigWindow : OdinEditorWindow
     public void DrawSaveConfiguraButton()
     {
         // 绘制保存配置按钮
+        if (isNewModule) GUILayout.BeginArea(new Rect(0, 555, 600, 200));
+        else GUILayout.BeginArea(new Rect(0, 510, 600, 200));
         if (GUILayout.Button("Save Config", GUILayout.Height(47)))
         {
             SaveConfiguration();
         }
+        GUILayout.EndArea();
 
         // 绘制删除配置按钮
-        if (GUILayout.Button("Delete Config", GUILayout.Height(47)))
+        GUILayout.BeginArea(new Rect(0, 555, 600, 200));
+        if (!isNewModule && GUILayout.Button("Delete Config", GUILayout.Height(47)))
         {
             bool confirmDelete = EditorUtility.DisplayDialog("确认删除", "是否确认删除该配置？", "确认", "取消");
             if (confirmDelete)
@@ -78,6 +97,7 @@ public class BundleModuleConfigWindow : OdinEditorWindow
                 DeleteConfiguration();
             }
         }
+        GUILayout.EndArea();
     }
 
     /// <summary>
