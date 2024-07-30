@@ -18,7 +18,7 @@ using UnityEngine;
 * Modify: 
  *
  * ********************************************/ 
-namespace ZM.AssetFrameWork
+namespace ZMAssetFrameWork
  {
 	
 	public class AES

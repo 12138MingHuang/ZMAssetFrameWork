@@ -12,7 +12,7 @@
 * Modify: 
 *
 * *****************************************************************************************/
-namespace ZM.AssetFrameWork
+namespace ZMAssetFrameWork
 {
 	
 	//字符串生成crc

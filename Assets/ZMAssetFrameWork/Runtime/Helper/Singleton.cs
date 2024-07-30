@@ -10,7 +10,7 @@
 *
 * Modify: 
 ------------------------------------------------------------------------------------------------------------------------------------------------*/
-namespace ZM.AssetFrameWork
+namespace ZMAssetFrameWork
 {
 
 	public class Singleton<T> where T : new()

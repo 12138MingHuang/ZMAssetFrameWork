@@ -14,7 +14,7 @@
 using System.IO;
 using System.Text;
 
-namespace ZM.AssetFrameWork
+namespace ZMAssetFrameWork
 {
     public class MD5
     {

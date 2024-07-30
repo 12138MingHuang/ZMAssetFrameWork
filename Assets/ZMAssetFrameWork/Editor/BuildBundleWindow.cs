@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using ZMAssetsFrameWork;
+using ZMAssetFrameWork;
 
 public class BuildBundleWindow : BundleBehaviour
 {

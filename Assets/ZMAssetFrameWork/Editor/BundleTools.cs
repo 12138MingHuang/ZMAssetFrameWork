@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class BundleTools
 {
-    public static string _bundleModuleEnumFilePath = Application.dataPath + "/ZMAssetsFrameWork/Config/BundleModuleEnum.cs";
+    public static string _bundleModuleEnumFilePath = Application.dataPath + "/ZMAssetFrameWork/Config/BundleModuleEnum.cs";
 
     [MenuItem("ZMAssetFrameWork/Generate BundleModuleEnum")]
     public static void GenerateBundleModuleEnum()

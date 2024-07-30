@@ -5,10 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
-using ZM.AssetFrameWork;
 using ZMAssetFrameWork;
 
-namespace ZMAssetsFrameWork
+namespace ZMAssetFrameWork
 {
     public enum BuildType
     {
@@ -94,7 +93,7 @@ namespace ZMAssetsFrameWork
         {
             get
             {
-                return Application.dataPath + "/ZMAssetsFrameWork/Resources/";
+                return Application.dataPath + "/ZMAssetFrameWork/Resources/";
             }
         }
         
