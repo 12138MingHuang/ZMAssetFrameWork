@@ -100,7 +100,7 @@ public class BuildBundleWindow : BundleBehaviour
         {
             if (item.isBuild)
             {
-                // TODO 内嵌资源代码
+                BuildBundleCompiler.CopyBundleToStreamingAssets(item);
             }
         }
     }

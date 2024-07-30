@@ -8,7 +8,7 @@ public class FileHelper
     /// <summary>
     /// 删除文件夹
     /// </summary>
-    /// <param name="folderPath"></param>
+    /// <param name="folderPath">文件夹</param>
     public static void DeleteFolder(string folderPath)
     {
         if (Directory.Exists(folderPath))
@@ -23,5 +23,22 @@ public class FileHelper
             }
             Directory.Delete(folderPath);
         }
+    }
+
+    /// <summary>
+    /// 写入文件
+    /// </summary>
+    /// <param name="filePath">文件路径</param>
+    /// <param name="data">写入数据</param>
+    public static void WriteFile(string filePath, byte[] data)
+    {
+        if(File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
+        FileStream fs = File.Create(filePath);
+        fs.Write(data, 0, data.Length);
+        fs.Dispose();
+        fs.Close();
     }
 }

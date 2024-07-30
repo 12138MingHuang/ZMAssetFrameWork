@@ -75,7 +75,17 @@ namespace ZMAssetsFrameWork
                 return Application.dataPath + "/../AssetBundle/" + _bundleModuleEnum.ToString() + "/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "/";
             }
         }
-        
+
+        /// <summary>
+        /// 资源文件路径
+        /// </summary>
+        private static string ResourcesPath
+        {
+            get
+            {
+                return Application.dataPath + "/ZMAssetsFrameWork/Resources/";
+            }
+        }
         
         /// <summary>
         /// 打包AssetBundle资源包
@@ -311,8 +321,8 @@ namespace ZMAssetsFrameWork
                     AssetImporter assetImporter = AssetImporter.GetAtPath(path);
                     if (assetImporter != null)
                     {
-                        // assetImporter.assetBundleName = isClear ? "" : item.Key;
-                        assetImporter.assetBundleName = isClear ? "" : item.Key + ".unity";
+                        // assetImporter.assetBundleName = isClear ? "" : item.Key + ".unity";
+                        assetImporter.assetBundleName = isClear ? "" : item.Key;
                     }
                 }
             }
@@ -329,8 +339,8 @@ namespace ZMAssetsFrameWork
                     AssetImporter assetImporter = AssetImporter.GetAtPath(path);
                     if (assetImporter != null)
                     {
-                        // assetImporter.assetBundleName = isClear ? "" : item.Key;
-                        assetImporter.assetBundleName = isClear ? "" : item.Key + ".unity";
+                        // assetImporter.assetBundleName = isClear ? "" : item.Key + ".unity";
+                        assetImporter.assetBundleName = isClear ? "" : item.Key;
                     }
                 }
             }
@@ -423,8 +433,8 @@ namespace ZMAssetsFrameWork
             AssetImporter assetImporter = AssetImporter.GetAtPath(bundleConfigPath.Replace(Application.dataPath, "Assets"));
             if (assetImporter != null)
             {
-                assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig.unity";
-                // assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig";
+                // assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig.unity";
+                assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig";
             }
             
         }
@@ -485,6 +495,52 @@ namespace ZMAssetsFrameWork
             }
             EditorUtility.ClearProgressBar();
             Debug.Log("加密AssetBundle完成");
+        }
+
+        public static void CopyBundleToStreamingAssets(BundleModuleData bundleModuleData, bool showTips = true)
+        {
+            _bundleModuleEnum = (BundleModuleEnum)Enum.Parse(typeof(BundleModuleEnum), bundleModuleData.moduleName);
+            //获取目标文件夹下的所有AssetBundle文件
+            DirectoryInfo directoryInfo = new DirectoryInfo(BundleOutPutPath);
+            FileInfo[] fileInfoArr = directoryInfo.GetFiles("*", SearchOption.AllDirectories);
+            //Bundle内嵌的目标文件夹
+            string streamingAssetsPath = Application.streamingAssetsPath + "/AssetBundle/" + _bundleModuleEnum + "/";
+            
+            FileHelper.DeleteFolder(streamingAssetsPath);
+            Directory.CreateDirectory(streamingAssetsPath);
+            
+            List<BuiltinBundleInfo> bundleInfoList = new List<BuiltinBundleInfo>();
+            for (int i = 0; i < fileInfoArr.Length; i++)
+            {
+                EditorUtility.DisplayProgressBar("内嵌资源中", "正在内嵌资源：" + fileInfoArr[i].Name, i * 1.0f / fileInfoArr.Length);
+                //拷贝文件
+                File.Copy(fileInfoArr[i].FullName, streamingAssetsPath + fileInfoArr[i].Name);
+                //生成内嵌资源文件信息
+                BuiltinBundleInfo bundleInfo = new BuiltinBundleInfo();
+                bundleInfo.fileName = fileInfoArr[i].Name;
+                bundleInfo.md5 = MD5.GetMd5FromFile(fileInfoArr[i].FullName);
+                bundleInfo.size = fileInfoArr[i].Length / 1024;
+                bundleInfoList.Add(bundleInfo);
+            }
+            
+            string json = JsonConvert.SerializeObject(bundleInfoList, Formatting.Indented);
+            
+            if(!Directory.Exists(ResourcesPath))
+            {
+                Directory.CreateDirectory(ResourcesPath);
+            }
+            
+            //写入配置文件到Ressources文件夹
+            FileHelper.WriteFile(ResourcesPath+_bundleModuleEnum+"Info.json", System.Text.Encoding.UTF8.GetBytes(json));
+            
+            AssetDatabase.Refresh();
+            
+            EditorUtility.ClearProgressBar();
+            if (showTips)
+            {
+                EditorUtility.DisplayDialog("内嵌操作", "内嵌资源完成 Path" + streamingAssetsPath, "确定");
+            }
+            Debug.Log("内嵌资源完成 Path" + streamingAssetsPath);
         }
     }   
 }
