@@ -1,9 +1,11 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using ZM.AssetFrameWork;
 using ZMAssetFrameWork;
 
 namespace ZMAssetsFrameWork
@@ -62,6 +64,17 @@ namespace ZMAssetsFrameWork
         /// 所有的预制体的Bundle字典
         /// </summary>
         private static Dictionary<string, List<string>> _allPrefabsBundleDic = new Dictionary<string, List<string>>();
+
+        /// <summary>
+        /// AssetBundle文件输出路径
+        /// </summary>
+        private static string BundleOutPutPath
+        {
+            get
+            {
+                return Application.dataPath + "/../AssetBundle/" + _bundleModuleEnum.ToString() + "/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "/";
+            }
+        }
         
         
         /// <summary>
@@ -104,6 +117,9 @@ namespace ZMAssetsFrameWork
             _updateNotice = updateNotice;
             _bundleModuleData = bundleModuleData;
             _bundleModuleEnum = (BundleModuleEnum)Enum.Parse(typeof(BundleModuleEnum), bundleModuleData.moduleName);
+            
+            FileHelper.DeleteFolder(BundleOutPutPath);
+            Directory.CreateDirectory(BundleOutPutPath);
         }
 
         /// <summary>
@@ -262,9 +278,16 @@ namespace ZMAssetsFrameWork
             //生成一份AssetBundle打包配置
             WriteAssetBundleConfig();
             //调用UnityAPI打包AssetBundle
-            
-            
-            // ModifyAllFileBundleName(true);
+            AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(BundleOutPutPath, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
+            if(manifest == null)
+            {
+                Debug.LogError("打包AssetBundle失败");
+            }
+            else
+            {
+                Debug.Log("打包AssetBundle成功");
+            }
+            ModifyAllFileBundleName(true);
             EditorUtility.ClearProgressBar();
         }
 
@@ -312,6 +335,13 @@ namespace ZMAssetsFrameWork
             //移除未使用的AssetBundleName
             if (isClear)
             {
+                string bundleConfigPath = Application.dataPath + "/" + _bundleModuleEnum.ToString().ToLower() + "AssetBundleConfig.json";
+                AssetImporter assetImporter = AssetImporter.GetAtPath(bundleConfigPath.Replace(Application.dataPath, "Assets"));
+                if (assetImporter != null)
+                {
+                    assetImporter.assetBundleName = "";
+                }
+                
                 AssetDatabase.RemoveUnusedAssetBundleNames();
             }
         }
@@ -345,6 +375,55 @@ namespace ZMAssetsFrameWork
             }
             
             //计算AssetBundle数据，生成AssetBundle配置文件
+            foreach (var item in allBundleFilePathDic)
+            {
+                //获取文件路径
+                string filePath = item.Key;
+                if (!filePath.EndsWith(".cs"))
+                {
+                    BundleInfo bundleInfo = new BundleInfo();
+                    bundleInfo.path = filePath;
+                    bundleInfo.bundleName = item.Value;
+                    bundleInfo.assetName = Path.GetFileName(filePath);
+                    bundleInfo.crc = Crc32.GetCrc32(filePath);
+                    bundleInfo.bundleDependce = new List<string>();
+                    
+                    string[] dependceArr = AssetDatabase.GetDependencies(filePath);
+                    foreach (string dependcePath in dependceArr)
+                    {
+                        //如果依赖项不是当前的这个文件，以及依赖项不是cs脚本，就进行处理
+                        if (!dependcePath.Equals(filePath) && !dependcePath.EndsWith(".cs"))
+                        {
+                            string dependceBundleName = "";
+                            if (allBundleFilePathDic.TryGetValue(dependcePath, out dependceBundleName))
+                            {
+                                //如果依赖项已经包含在这个AsetBundle中，则不处理，否则添加到依赖项中
+                                if (!bundleInfo.bundleDependce.Contains(dependceBundleName))
+                                {
+                                    bundleInfo.bundleDependce.Add(dependceBundleName);
+                                }
+                            }
+                        }
+                    }
+                    bundleConfig.bundleInfoList.Add(bundleInfo);
+                }
+            }
+            
+            //生成AssetBundle配置文件
+            string json = JsonConvert.SerializeObject(bundleConfig, Formatting.Indented);
+            string bundleConfigPath = Application.dataPath + "/" + _bundleModuleEnum.ToString().ToLower() + "AssetBundleConfig.json";
+            StreamWriter writer = File.CreateText(bundleConfigPath);
+            writer.Write(json);
+            writer.Dispose();
+            writer.Close();
+            //修改AssetBundle配置文件的AssetBundleName
+            AssetImporter assetImporter = AssetImporter.GetAtPath(bundleConfigPath.Replace(Application.dataPath, "Assets"));
+            if (assetImporter != null)
+            {
+                assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig.unity";
+                // assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig";
+            }
+            
         }
         
         /// <summary>

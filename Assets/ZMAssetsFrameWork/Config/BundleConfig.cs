@@ -25,7 +25,7 @@ public class BundleInfo
     /// <summary>
     /// crc
     /// </summary>
-    public string crc;
+    public uint crc;
     
     /// <summary>
     /// AssetsBundle 名称

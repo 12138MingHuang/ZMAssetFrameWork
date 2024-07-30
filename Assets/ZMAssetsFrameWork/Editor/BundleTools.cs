@@ -51,6 +51,7 @@ public class BundleTools
         writer.WriteLine("\t}");
         writer.WriteLine("}");
         writer.Flush();
+        writer.Dispose();
         writer.Close();
         
         AssetDatabase.Refresh();
