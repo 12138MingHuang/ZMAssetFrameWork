@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -7,15 +8,15 @@ using ZMAssetsFrameWork;
 public class BuildHotPatchWindow : BundleBehaviour
 {
     protected string[] buildButtonsNameArr = new string[] { "打包热更", "上传资源" };
-    
+
     //热更描述 热更公告
     [HideInInspector]
     public string patchDes = "输入本次热更描述...";
-    
+
     //热更补丁版本号
     [HideInInspector]
     public string hotVersion = "1.0";
-    
+
     public override void Initialization()
     {
         base.Initialization();
@@ -24,23 +25,23 @@ public class BuildHotPatchWindow : BundleBehaviour
     public override void OnGUI()
     {
         base.OnGUI();
-        
+
         GUILayout.BeginArea(new Rect(0, 400, 800, 600));
-        
+
         GUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("请输入本次热更公告");
         GUILayout.EndHorizontal();
-        
+
         GUILayout.BeginHorizontal();
         patchDes = GUILayout.TextField(patchDes, GUILayout.Width(800), GUILayout.Height(80));
         GUILayout.EndHorizontal();
-        
+
         GUILayout.Space(10);
-        
+
         GUILayout.BeginHorizontal();
         hotVersion = EditorGUILayout.TextField("热更版本号", hotVersion, GUILayout.Width(800), GUILayout.Height(24));
         GUILayout.EndHorizontal();
-        
+
         GUILayout.EndArea();
     }
 
@@ -62,38 +63,49 @@ public class BuildHotPatchWindow : BundleBehaviour
     public override void DrawBuildButtons()
     {
         base.DrawBuildButtons();
-        
-        GUILayout.BeginArea(new Rect(0, 555 ,800, 600));
-        
-        GUILayout.BeginHorizontal();
 
-        for (int i = 0; i < buildButtonsNameArr.Length; i++)
+        GUILayout.BeginArea(new Rect(0, 555, 800, 600));
+
+        GUILayout.BeginHorizontal();
+        try
         {
-            GUIStyle guiStyle = UnityEditorUility.GetGUIStyle("PreButtonBlue");
-            guiStyle.fixedHeight = 55;
-            
-            if(GUILayout.Button(buildButtonsNameArr[i], guiStyle, GUILayout.Width(400)))
+            for (int i = 0; i < buildButtonsNameArr.Length; i++)
             {
-                if(i == 0)
+                GUIStyle guiStyle = UnityEditorUility.GetGUIStyle("PreButtonBlue");
+                guiStyle.fixedHeight = 55;
+
+                int buttonIndex = i; // 存储当前迭代的索引
+                if (GUILayout.Button(buildButtonsNameArr[buttonIndex], guiStyle, GUILayout.Width(400)))
                 {
-                    //打包AssetBundle按钮事件
-                    this.BuildBundle();
-                }
-                else
-                {
-                    CopyBundleToStreamingAssetsPath();
+                    EditorApplication.delayCall += () =>
+                    {
+                        if (buttonIndex == 0)
+                        {
+                            //打包AssetBundle按钮事件
+                            this.BuildBundle();
+                        }
+                        else
+                        {
+                            CopyBundleToStreamingAssetsPath();
+                        }
+                    };
                 }
             }
+
+            //打包图标绘制
+            GUI.DrawTexture(new Rect(130, 13, 30, 30), EditorGUIUtility.IconContent(curPlatfam).image);
+            //内嵌资源图标绘制
+            GUI.DrawTexture(new Rect(545, 13, 30, 30), EditorGUIUtility.IconContent("CollabPush".Trim()).image);
         }
-        
-        //打包图标绘制
-        GUI.DrawTexture(new Rect(130, 13, 30, 30), EditorGUIUtility.IconContent(curPlatfam).image);
-        //内嵌资源图标绘制
-        GUI.DrawTexture(new Rect(545, 13, 30, 30), EditorGUIUtility.IconContent("CollabPush".Trim()).image);
-        
-        GUILayout.EndHorizontal();
-        
-        GUILayout.EndArea();
+        catch (Exception ex)
+        {
+            Debug.LogError($"Error drawing build buttons: {ex}");
+        }
+        finally
+        {
+            GUILayout.EndHorizontal();
+            GUILayout.EndArea();
+        }
     }
 
     public override void BuildBundle()
@@ -104,11 +116,11 @@ public class BuildHotPatchWindow : BundleBehaviour
         {
             if (item.isBuild)
             {
-                BuildBundleCompiler.BuildAssetBundle(item, BuildType.HotPatch, int.Parse(hotVersion), patchDes);
+                BuildBundleCompiler.BuildAssetBundle(item, BuildType.HotPatch, hotVersion, patchDes);
             }
         }
     }
-    
+
     /// <summary>
     /// 内嵌资源
     /// </summary>

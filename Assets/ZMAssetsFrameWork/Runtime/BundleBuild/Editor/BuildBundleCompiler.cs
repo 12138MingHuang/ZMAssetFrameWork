@@ -33,7 +33,7 @@ namespace ZMAssetsFrameWork
         /// <summary>
         /// 热更补丁版本
         /// </summary>
-        private static int _hotPatchVersion;
+        private static string _hotPatchVersion;
         
         /// <summary>
         /// 打包类型
@@ -75,6 +75,17 @@ namespace ZMAssetsFrameWork
                 return Application.dataPath + "/../AssetBundle/" + _bundleModuleEnum.ToString() + "/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "/";
             }
         }
+        
+        /// <summary>
+        /// 热更资源文件输出路径
+        /// </summary>
+        private static string HotAssetsOutPutPath
+        {
+            get
+            {
+                return Application.dataPath + "/../HotAssets/" + _bundleModuleEnum.ToString() + "/" + _hotPatchVersion + "/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "/";
+            }
+        }
 
         /// <summary>
         /// 资源文件路径
@@ -94,7 +105,7 @@ namespace ZMAssetsFrameWork
         /// <param name="buildType">打包类型</param>
         /// <param name="hotPatchVersion">热更补丁版本</param>
         /// <param name="updateNotice">更新公告</param>
-        public static void BuildAssetBundle(BundleModuleData bundleModuleData, BuildType buildType, int hotPatchVersion = 0, string updateNotice = "")
+        public static void BuildAssetBundle(BundleModuleData bundleModuleData, BuildType buildType, string hotPatchVersion = "0", string updateNotice = "")
         {
             //初始化打包数据
             Initlization(bundleModuleData, buildType, hotPatchVersion, updateNotice);
@@ -115,7 +126,7 @@ namespace ZMAssetsFrameWork
         /// <param name="buildType">打包类型</param>
         /// <param name="hotPatchVersion">热更补丁版本</param>
         /// <param name="updateNotice">更新公告</param>
-        private static void Initlization(BundleModuleData bundleModuleData, BuildType buildType, int hotPatchVersion, string updateNotice)
+        private static void Initlization(BundleModuleData bundleModuleData, BuildType buildType, string hotPatchVersion, string updateNotice)
         {
             //清理数据以防下次打包时有数据残留
             _allBundlePathList.Clear();
@@ -299,6 +310,10 @@ namespace ZMAssetsFrameWork
                 Debug.Log("打包AssetBundle成功");
                 DeleteAllBundleMainfestFile();
                 EncrypAllBundle();
+                if (_buildType == BuildType.HotPatch)
+                {
+                    GeneratorHotAssets();
+                }
             }
             ModifyAllFileBundleName(true);
             EditorUtility.ClearProgressBar();
@@ -321,8 +336,9 @@ namespace ZMAssetsFrameWork
                     AssetImporter assetImporter = AssetImporter.GetAtPath(path);
                     if (assetImporter != null)
                     {
+                        //这里的文件读取失败是AssetBundle后缀引起的，高版本Unity自动会自动读取,unity文件,导致文件大小异常，解决方案:建议不要AssetBundle后缀,或更换后缀
                         // assetImporter.assetBundleName = isClear ? "" : item.Key + ".unity";
-                        assetImporter.assetBundleName = isClear ? "" : item.Key;
+                        assetImporter.assetBundleName = isClear ? "" : item.Key + ".ab";
                     }
                 }
             }
@@ -339,8 +355,9 @@ namespace ZMAssetsFrameWork
                     AssetImporter assetImporter = AssetImporter.GetAtPath(path);
                     if (assetImporter != null)
                     {
+                        //这里的文件读取失败是AssetBundle后缀引起的，高版本Unity自动会自动读取,unity文件,导致文件大小异常，解决方案:建议不要AssetBundle后缀,或更换后缀
                         // assetImporter.assetBundleName = isClear ? "" : item.Key + ".unity";
-                        assetImporter.assetBundleName = isClear ? "" : item.Key;
+                        assetImporter.assetBundleName = isClear ? "" : item.Key + ".ab";
                     }
                 }
             }
@@ -433,8 +450,9 @@ namespace ZMAssetsFrameWork
             AssetImporter assetImporter = AssetImporter.GetAtPath(bundleConfigPath.Replace(Application.dataPath, "Assets"));
             if (assetImporter != null)
             {
+                //这里的文件读取失败是AssetBundle后缀引起的，高版本Unity自动会自动读取,unity文件,导致文件大小异常，解决方案:建议不要AssetBundle后缀,或更换后缀
                 // assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig.unity";
-                assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig";
+                assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig.ab";
             }
             
         }
@@ -497,6 +515,11 @@ namespace ZMAssetsFrameWork
             Debug.Log("加密AssetBundle完成");
         }
 
+        /// <summary>
+        /// 拷贝Bundle文件到StreamingAssets文件夹
+        /// </summary>
+        /// <param name="bundleModuleData">bundle模块数据</param>
+        /// <param name="showTips">是否提示</param>
         public static void CopyBundleToStreamingAssets(BundleModuleData bundleModuleData, bool showTips = true)
         {
             _bundleModuleEnum = (BundleModuleEnum)Enum.Parse(typeof(BundleModuleEnum), bundleModuleData.moduleName);
@@ -542,5 +565,24 @@ namespace ZMAssetsFrameWork
             }
             Debug.Log("内嵌资源完成 Path" + streamingAssetsPath);
         }
-    }   
+
+        /// <summary>
+        /// 生成热更资源
+        /// </summary>
+        private static void GeneratorHotAssets()
+        {
+            FileHelper.DeleteFolder(HotAssetsOutPutPath);
+            Directory.CreateDirectory(HotAssetsOutPutPath);
+            
+            string[] bundlePathArr = Directory.GetFiles(BundleOutPutPath, "*.ab");
+            for (int i = 0; i < bundlePathArr.Length; i++)
+            {
+                string path = bundlePathArr[i];
+                EditorUtility.DisplayProgressBar("生成热更资源", "正在生成热更资源：" + Path.GetFileName(path), i * 1.0f / bundlePathArr.Length);
+                string disPath = HotAssetsOutPutPath + Path.GetFileName(path);
+                File.Copy(path, disPath);
+            }
+            Debug.Log("生成热更资源完成");
+        }
+    }
 }
