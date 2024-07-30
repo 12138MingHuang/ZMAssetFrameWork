@@ -582,6 +582,40 @@ namespace ZMAssetFrameWork
                 File.Copy(path, disPath);
             }
             Debug.Log("生成热更资源完成");
+            GeneratorHotAssetsMainfest();
         }
+
+        /// <summary>
+        /// 生成热更资源配置清单
+        /// </summary>
+        private static void GeneratorHotAssetsMainfest()
+        {
+            //设置资源清单数据
+            HotAssetsMainfest hotAssetsMainfest = new HotAssetsMainfest();
+            hotAssetsMainfest.updateNotice = _updateNotice;
+            hotAssetsMainfest.downLoadURL = "http://127.0.0.1";
+            
+            //设置补丁数据
+            HotAssetsPatch hotAssetsPatch = new HotAssetsPatch();
+            hotAssetsPatch.patchVesion = _hotPatchVersion;
+            
+            //计算热更补丁文件信息
+            DirectoryInfo directoryInfo = new DirectoryInfo(HotAssetsOutPutPath);
+            FileInfo[] bundleInfoArr = directoryInfo.GetFiles("*.ab");
+            foreach (FileInfo bundleInfo in bundleInfoArr)
+            {
+                HotFileInfo hotFileInfo = new HotFileInfo();
+                hotFileInfo.abName = bundleInfo.Name;
+                hotFileInfo.md5 = MD5.GetMd5FromFile(bundleInfo.FullName);
+                hotFileInfo.size = bundleInfo.Length / 1024.0f;
+                hotAssetsPatch.hotAssetsList.Add(hotFileInfo);
+            }
+            hotAssetsMainfest.hotAssetsPatchList.Add(hotAssetsPatch);
+            
+            //把对象转为Json字符串
+            string json = JsonConvert.SerializeObject(hotAssetsMainfest, Formatting.Indented);
+            FileHelper.WriteFile(Application.dataPath + "/../HotAssets/" + _bundleModuleEnum + "AssetsHotMainfest.json", System.Text.Encoding.UTF8.GetBytes(json));
+        }
+
     }
 }
