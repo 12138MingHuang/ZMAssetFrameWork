@@ -281,11 +281,14 @@ namespace ZMAssetsFrameWork
             AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(BundleOutPutPath, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
             if(manifest == null)
             {
+                EditorUtility.DisplayProgressBar("打包AssetBundle", "打包AssetBundle失败", 1);
                 Debug.LogError("打包AssetBundle失败");
             }
             else
             {
                 Debug.Log("打包AssetBundle成功");
+                DeleteAllBundleMainfestFile();
+                EncrypAllBundle();
             }
             ModifyAllFileBundleName(true);
             EditorUtility.ClearProgressBar();
@@ -397,7 +400,7 @@ namespace ZMAssetsFrameWork
                             string dependceBundleName = "";
                             if (allBundleFilePathDic.TryGetValue(dependcePath, out dependceBundleName))
                             {
-                                //如果依赖项已经包含在这个AsetBundle中，则不处理，否则添加到依赖项中
+                                //如果依赖项已经包含在这个AssetBundle中，则不处理，否则添加到依赖项中
                                 if (!bundleInfo.bundleDependce.Contains(dependceBundleName))
                                 {
                                     bundleInfo.bundleDependce.Add(dependceBundleName);
@@ -451,6 +454,37 @@ namespace ZMAssetsFrameWork
         private static string GenerateBundleName(string abName)
         {
             return _bundleModuleEnum.ToString() + "_" + abName;
+        }
+
+        /// <summary>
+        /// 删除所有AssetBundle自动生成的Mainfest文件
+        /// </summary>
+        private static void DeleteAllBundleMainfestFile()
+        {
+            string[] filePathArr = Directory.GetFiles(BundleOutPutPath);
+            foreach (string filePath in filePathArr)
+            {
+                if (filePath.EndsWith(".manifest"))
+                {
+                    File.Delete(filePath);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 加密所有AssetBundle文件
+        /// </summary>
+        private static void EncrypAllBundle()
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(BundleOutPutPath);
+            FileInfo[] fileInfoArr = directoryInfo.GetFiles("*", SearchOption.AllDirectories);
+            for (int i = 0; i < fileInfoArr.Length; i++)
+            {
+                EditorUtility.DisplayProgressBar("加密AssetBundle", "正在加密AssetBundle文件：" + fileInfoArr[i].Name, i * 1.0f / fileInfoArr.Length);
+                AES.AESFileEncrypt(fileInfoArr[i].FullName, "zhangbin");
+            }
+            EditorUtility.ClearProgressBar();
+            Debug.Log("加密AssetBundle完成");
         }
     }   
 }
