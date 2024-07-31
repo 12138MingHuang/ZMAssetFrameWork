@@ -56,7 +56,7 @@ public class BuildHotPatchWindow : BundleBehaviour
         bool isClick = GUILayout.Button(addContent, GUILayout.Width(130), GUILayout.Height(170));
         if (isClick)
         {
-            // TODO 编写添加模块代码
+            BundleModuleConfigWindow.ShowWindow("");
         }
     }
 
