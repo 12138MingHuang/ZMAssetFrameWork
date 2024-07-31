@@ -447,7 +447,7 @@ namespace ZMAssetFrameWork
             
             //生成AssetBundle配置文件
             string json = JsonConvert.SerializeObject(bundleConfig, Formatting.Indented);
-            string bundleConfigPath = Application.dataPath + "/" + _bundleModuleEnum.ToString().ToLower() + "AssetBundleConfig.json";
+            string bundleConfigPath = Application.dataPath + "/" + _bundleModuleEnum.ToString() + "AssetBundleConfig.json";
             StreamWriter writer = File.CreateText(bundleConfigPath);
             writer.Write(json);
             writer.Dispose();
