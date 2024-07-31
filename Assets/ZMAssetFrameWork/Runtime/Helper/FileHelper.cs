@@ -32,7 +32,7 @@ public class FileHelper
     /// <param name="data">写入数据</param>
     public static void WriteFile(string filePath, byte[] data)
     {
-        if(File.Exists(filePath))
+        if (File.Exists(filePath))
         {
             File.Delete(filePath);
         }

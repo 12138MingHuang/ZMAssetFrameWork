@@ -1,17 +1,4 @@
-﻿/*****************************************************************************************
-*
-* Title: ZM 资源管理框架  
-*
-*Description: 集多版本、多模块热更、回退、加密、解密、压缩、内嵌、解压、下载、Editor加载、Bundle加载、 冗余剔除、多版本颗粒化、 等一体式框架
-*
-* Author: 铸梦xu
-*
-* Date: 2019.7.1
-*
-* Modify: 
-*
-* *****************************************************************************************/
-using System.IO;
+﻿using System.IO;
 using System.Text;
 
 namespace ZMAssetFrameWork
@@ -19,10 +6,10 @@ namespace ZMAssetFrameWork
     public class MD5
     {
         /// <summary>
-        /// 传一个文件的路径，返回该文件的MD5字符串
+        /// 从指定文件路径获取文件的MD5值
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="path">文件路径</param>
+        /// <returns>文件的MD5值</returns>
         public static string GetMd5FromFile(string path)
         {
             using (System.Security.Cryptography.MD5 md5File = System.Security.Cryptography.MD5.Create())
@@ -42,14 +29,11 @@ namespace ZMAssetFrameWork
 
         }
 
-
-
-
         /// <summary>
-        /// 传一个字符串，方法改字符串的MD5字符串
+        /// 从字符串中获取MD5哈希值
         /// </summary>
-        /// <param name="msg"></param>
-        /// <returns></returns>
+        /// <param name="msg">需要计算哈希值的字符串</param>
+        /// <returns>返回该字符串的MD5哈希值</returns>
         public static string GetMd5FromString(string msg)
         {
             //1.创建一个用来计算MD5值的类的对象

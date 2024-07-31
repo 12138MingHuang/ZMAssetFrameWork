@@ -1,34 +1,47 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
+
 namespace ZMAssetFrameWork
 {
+    /// <summary>
+    /// MonoSingleton 抽象类，用于实现单例模式的 MonoBehaviour 组件。
+    /// </summary>
+    /// <typeparam name="T">继承自 MonoSingleton 的类型。</typeparam>
     public abstract class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T>
     {
-        protected static T mInstance = null;
+        /// <summary>
+        /// 单例实例。
+        /// </summary>
+        private static T _instance = null;
+
+        /// <summary>
+        /// 获取单例实例。
+        /// </summary>
         public static T Instance
         {
             get
             {
-                if (mInstance == null)
+                if (_instance == null)
                 {
-                    mInstance = Object.FindObjectOfType<T>();
-                    if (mInstance == null)
+                    _instance = Object.FindObjectOfType<T>();
+                    if (_instance == null)
                     {
-                        var obj = new GameObject(typeof(T).Name);
-                        mInstance = obj.AddComponent<T>();
-                        mInstance.OnAwake();
+                        GameObject obj = new GameObject(typeof(T).Name);
+                        _instance = obj.AddComponent<T>();
+                        _instance.OnAwake();
                     }
                 }
-                return mInstance;
+                return _instance;
             }
         }
-        protected virtual void OnAwake()
-        {
+        
+        protected virtual void OnAwake() { }
 
-        }
+        /// <summary>
+        /// 销毁单例对象。
+        /// </summary>
         public virtual void Dispose()
         {
-            Destroy(mInstance.gameObject);
+            Destroy(_instance.gameObject);
         }
     }
 }
