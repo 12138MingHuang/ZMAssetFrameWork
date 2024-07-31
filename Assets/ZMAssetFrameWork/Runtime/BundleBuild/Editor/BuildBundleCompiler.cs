@@ -161,7 +161,7 @@ namespace ZMAssetFrameWork
                     _allBundlePathList.Add(folderPath);
                     //获取以模块名+_+ABName的格式的AssetBundle包名
                     string bundleName = GenerateBundleName(_bundleModuleData.signFolderPathArr[i].abName);
-                    if (!_allFolderBundleDic.ContainsKey(folderPath))
+                    if (!_allFolderBundleDic.ContainsKey(bundleName))
                     {
                         _allFolderBundleDic.Add(bundleName, new List<string>() { folderPath });
                     }
@@ -297,6 +297,9 @@ namespace ZMAssetFrameWork
             ModifyAllFileBundleName();
             //生成一份AssetBundle打包配置
             WriteAssetBundleConfig();
+            
+            AssetDatabase.Refresh();
+            
             //调用UnityAPI打包AssetBundle
             AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(
                 BundleOutPutPath, 
@@ -454,8 +457,8 @@ namespace ZMAssetFrameWork
             if (assetImporter != null)
             {
                 //这里的文件读取失败是AssetBundle后缀引起的，高版本Unity自动会自动读取,unity文件,导致文件大小异常，解决方案:建议不要AssetBundle后缀,或更换后缀
-                // assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig.unity";
-                assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig.ab";
+                // assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "BundleConfig.unity";
+                assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "BundleConfig.ab";
             }
             
         }
