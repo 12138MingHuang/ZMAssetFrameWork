@@ -34,6 +34,9 @@ public class BuildWindow : OdinMenuEditorWindow
             },
             {
                 "Build/HotPatch", buildHotPatchWindow, EditorIcons.UnityLogo
+            },
+            {
+                "BuildSetting", BundleSettings.Instance, EditorIcons.SettingsCog
             }
         };
         return menuTree;

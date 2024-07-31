@@ -298,7 +298,11 @@ namespace ZMAssetFrameWork
             //生成一份AssetBundle打包配置
             WriteAssetBundleConfig();
             //调用UnityAPI打包AssetBundle
-            AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(BundleOutPutPath, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
+            AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(
+                BundleOutPutPath, 
+                (UnityEditor.BuildAssetBundleOptions)Enum.Parse(typeof(UnityEditor.BuildAssetBundleOptions), BundleSettings.Instance.buildAssetBundleOptions.ToString()), 
+                (UnityEditor.BuildTarget)Enum.Parse(typeof(UnityEditor.BuildTarget), BundleSettings.Instance.buildTarget.ToString())
+                );
             if(manifest == null)
             {
                 EditorUtility.DisplayProgressBar("打包AssetBundle", "打包AssetBundle失败", 1);
@@ -503,12 +507,17 @@ namespace ZMAssetFrameWork
         /// </summary>
         private static void EncrypAllBundle()
         {
+            if(!BundleSettings.Instance.bundleEncrypt.isEncrypt)
+            {
+                return;
+            }
+            
             DirectoryInfo directoryInfo = new DirectoryInfo(BundleOutPutPath);
             FileInfo[] fileInfoArr = directoryInfo.GetFiles("*", SearchOption.AllDirectories);
             for (int i = 0; i < fileInfoArr.Length; i++)
             {
                 EditorUtility.DisplayProgressBar("加密AssetBundle", "正在加密AssetBundle文件：" + fileInfoArr[i].Name, i * 1.0f / fileInfoArr.Length);
-                AES.AESFileEncrypt(fileInfoArr[i].FullName, "zhangbin");
+                AES.AESFileEncrypt(fileInfoArr[i].FullName, BundleSettings.Instance.bundleEncrypt.encryptKey);
             }
             EditorUtility.ClearProgressBar();
             Debug.Log("加密AssetBundle完成");
@@ -593,7 +602,7 @@ namespace ZMAssetFrameWork
             //设置资源清单数据
             HotAssetsMainfest hotAssetsMainfest = new HotAssetsMainfest();
             hotAssetsMainfest.updateNotice = _updateNotice;
-            hotAssetsMainfest.downLoadURL = "http://127.0.0.1";
+            hotAssetsMainfest.downLoadURL = BundleSettings.Instance.AssetBundleDownLoadURL + "/HotAssets/" + _bundleModuleEnum + "/" + _hotPatchVersion + "/" + BundleSettings.Instance.buildTarget;
             
             //设置补丁数据
             HotAssetsPatch hotAssetsPatch = new HotAssetsPatch();
