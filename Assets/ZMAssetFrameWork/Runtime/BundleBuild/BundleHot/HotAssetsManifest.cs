@@ -7,7 +7,7 @@ namespace ZMAssetFrameWork
     /// <summary>
     /// 热更资源清单
     /// </summary>
-    public class HotAssetsMainfest
+    public class HotAssetsManifest
     {
         /// <summary>
         /// 热更公告

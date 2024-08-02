@@ -314,7 +314,7 @@ namespace ZMAssetFrameWork
             else
             {
                 Debug.Log("打包AssetBundle成功");
-                DeleteAllBundleMainfestFile();
+                DeleteAllBundleManifestFile();
                 EncrypAllBundle();
                 if (_buildType == BuildType.HotPatch)
                 {
@@ -491,9 +491,9 @@ namespace ZMAssetFrameWork
         }
 
         /// <summary>
-        /// 删除所有AssetBundle自动生成的Mainfest文件
+        /// 删除所有AssetBundle自动生成的Manifest文件
         /// </summary>
-        private static void DeleteAllBundleMainfestFile()
+        private static void DeleteAllBundleManifestFile()
         {
             string[] filePathArr = Directory.GetFiles(BundleOutPutPath);
             foreach (string filePath in filePathArr)
@@ -594,18 +594,18 @@ namespace ZMAssetFrameWork
                 File.Copy(path, disPath);
             }
             Debug.Log("生成热更资源完成");
-            GeneratorHotAssetsMainfest();
+            GeneratorHotAssetsManifest();
         }
 
         /// <summary>
         /// 生成热更资源配置清单
         /// </summary>
-        private static void GeneratorHotAssetsMainfest()
+        private static void GeneratorHotAssetsManifest()
         {
             //设置资源清单数据
-            HotAssetsMainfest hotAssetsMainfest = new HotAssetsMainfest();
-            hotAssetsMainfest.updateNotice = _updateNotice;
-            hotAssetsMainfest.downLoadURL = BundleSettings.Instance.AssetBundleDownLoadURL + "/HotAssets/" + _bundleModuleEnum + "/" + _hotPatchVersion + "/" + BundleSettings.Instance.buildTarget;
+            HotAssetsManifest hotAssetsManifest = new HotAssetsManifest();
+            hotAssetsManifest.updateNotice = _updateNotice;
+            hotAssetsManifest.downLoadURL = BundleSettings.Instance.AssetBundleDownLoadURL + "/HotAssets/" + _bundleModuleEnum + "/" + _hotPatchVersion + "/" + BundleSettings.Instance.buildTarget;
             
             //设置补丁数据
             HotAssetsPatch hotAssetsPatch = new HotAssetsPatch();
@@ -622,11 +622,11 @@ namespace ZMAssetFrameWork
                 hotFileInfo.size = bundleInfo.Length / 1024.0f;
                 hotAssetsPatch.hotAssetsList.Add(hotFileInfo);
             }
-            hotAssetsMainfest.hotAssetsPatchList.Add(hotAssetsPatch);
+            hotAssetsManifest.hotAssetsPatchList.Add(hotAssetsPatch);
             
             //把对象转为Json字符串
-            string json = JsonConvert.SerializeObject(hotAssetsMainfest, Formatting.Indented);
-            FileHelper.WriteFile(Application.dataPath + "/../HotAssets/" + _bundleModuleEnum + "AssetsHotMainfest.json", System.Text.Encoding.UTF8.GetBytes(json));
+            string json = JsonConvert.SerializeObject(hotAssetsManifest, Formatting.Indented);
+            FileHelper.WriteFile(Application.dataPath + "/../HotAssets/" + _bundleModuleEnum + "AssetsHotManifest.json", System.Text.Encoding.UTF8.GetBytes(json));
         }
 
     }
