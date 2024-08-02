@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -42,9 +43,12 @@ namespace ZMAssetFrameWork
         /// </summary>
         public Action<BundleModuleEnum> onDownLoadAllAssetsFinish;
 
-        public HotAssetsModule(BundleModuleEnum bundleModuleEnum)
+        private MonoBehaviour _monoBehaviour;
+
+        public HotAssetsModule(BundleModuleEnum bundleModuleEnum, MonoBehaviour monoBehaviour)
         {
             CurBundleModuleEnum = bundleModuleEnum;
+            _monoBehaviour = monoBehaviour;
         }
 
         /// <summary>
@@ -70,6 +74,60 @@ namespace ZMAssetFrameWork
         public void CheckAssetsVersion(Action<bool, float> checkCallBack)
         {
             GeneratorHotAssetsManifest();
+
+            _monoBehaviour.StartCoroutine(DownLoadHotAssetsManifest(() =>
+            {
+                //资源下载完成
+                
+                //1.检测当前版本是否需要热更
+                if (CheckModuleAssetsIsHot())
+                {
+                    
+                }
+                else
+                {
+                    
+                }
+                
+                //2.如果需要热更，开始计算需要下载的文件，开始下载文件
+                
+                //3.如果不需要热更，说明文件是新的，直接热更完成
+            }));
+        }
+
+        /// <summary>
+        /// 检测模块资源是否需要热更
+        /// </summary>
+        /// <returns>是否需要热更</returns>
+        private bool CheckModuleAssetsIsHot()
+        {
+            //如果服务端资源清单不存在，需需要热更
+            if (_serverHotAssetsManifest == null)
+            {
+                return false;
+            }
+            //如果本地资源清单文件不存在，说明需要热更
+            if (!File.Exists(_localHotAssetsManifestPath))
+            {
+                return true;
+            }
+            //判断本地资源清单补丁版本号是否与服务端资源清单补丁版本号一致，如果一致，不需要热更，如果不一致，则需要热更
+            HotAssetsManifest locHotAssetsManifest = JsonConvert.DeserializeObject<HotAssetsManifest>(File.ReadAllText(_localHotAssetsManifestPath));
+            if (locHotAssetsManifest.hotAssetsPatchList.Count == 0 && _serverHotAssetsManifest.hotAssetsPatchList.Count != 0)
+            {
+                return true;
+            }
+            //获取本地热更补丁的最后一个补丁
+            HotAssetsPatch localHotAssetsPatch = locHotAssetsManifest.hotAssetsPatchList[locHotAssetsManifest.hotAssetsPatchList.Count - 1];
+            //获取服务端热更补丁的最后一个补丁
+            HotAssetsPatch serverHotAssetsPatch = _serverHotAssetsManifest.hotAssetsPatchList[_serverHotAssetsManifest.hotAssetsPatchList.Count - 1];
+
+            if (localHotAssetsPatch != null && serverHotAssetsPatch != null)
+            {
+                return localHotAssetsPatch.patchVersion != serverHotAssetsPatch.patchVersion;
+            }
+
+            return serverHotAssetsPatch != null;
         }
 
         /// <summary>

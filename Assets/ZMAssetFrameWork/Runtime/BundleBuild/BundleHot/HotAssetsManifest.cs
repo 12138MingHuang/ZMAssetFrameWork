@@ -30,7 +30,7 @@ namespace ZMAssetFrameWork
         /// <summary>
         /// 补丁版本
         /// </summary>
-        public string patchVesion;
+        public string patchVersion;
         
         /// <summary>
         /// 热更资源信息列表

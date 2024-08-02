@@ -609,7 +609,7 @@ namespace ZMAssetFrameWork
             
             //设置补丁数据
             HotAssetsPatch hotAssetsPatch = new HotAssetsPatch();
-            hotAssetsPatch.patchVesion = _hotPatchVersion;
+            hotAssetsPatch.patchVersion = _hotPatchVersion;
             
             //计算热更补丁文件信息
             DirectoryInfo directoryInfo = new DirectoryInfo(HotAssetsOutPutPath);
