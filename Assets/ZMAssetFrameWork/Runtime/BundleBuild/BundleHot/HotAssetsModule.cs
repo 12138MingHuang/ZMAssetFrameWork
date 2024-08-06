@@ -67,6 +67,11 @@ namespace ZMAssetFrameWork
         private float AssetsMaxSizeM { get; set; }
 
         /// <summary>
+        /// 资源已经下载大小
+        /// </summary>
+        public float assetsDownLoadSizeM;
+
+        /// <summary>
         /// Mono脚本
         /// </summary>
         private MonoBehaviour _monoBehaviour;
@@ -85,9 +90,53 @@ namespace ZMAssetFrameWork
         /// <param name="isCheckAssetsVersion">是否检测资源版本</param>
         public void StartHotAssets(Action startDownLoadCallBack, Action<BundleModuleEnum> hotFinish = null, bool isCheckAssetsVersion = true)
         {
-            this.onDownLoadAllAssetsFinish = hotFinish;
+            this.onDownLoadAllAssetsFinish += hotFinish;
 
-            if (isCheckAssetsVersion) { }
+            if (isCheckAssetsVersion)
+            {
+                //检测资源版本是否需要热更
+                CheckAssetsVersion(((isHot, size) =>
+                {
+                    if (isHot)
+                    {
+                        
+                    }
+                    else
+                    {
+                        onDownLoadAllAssetsFinish?.Invoke(CurBundleModuleEnum);
+                    }
+                }));
+            }
+        }
+
+        /// <summary>
+        /// 开始下载热更资源
+        /// </summary>
+        /// <param name="startDownLoadCallBack"></param>
+        public void StartDownLoadHotAssets(Action startDownLoadCallBack)
+        {
+            //优先下载AssetBundle配置文件，下载完成后，调用回调，及时加载配置文件
+            //热更资源下载完成之后同样给与回调，动态加载刚下载完成的资源
+            List<HotFileInfo> downLoadList = new List<HotFileInfo>();
+            for (int i = 0; i < _needDownLoadAssetsList.Count; i++)
+            {
+                HotFileInfo hotFileInfo = _needDownLoadAssetsList[i];
+                //如果包含Config说明是配置文件，需要优先下载
+                if (hotFileInfo.abName.Contains("config"))
+                {
+                    downLoadList.Insert(0, hotFileInfo);
+                }
+                else
+                {
+                    downLoadList.Add(hotFileInfo);
+                }
+            }
+            //获取资源下载队列
+            Queue<HotFileInfo> downloadQueue = new Queue<HotFileInfo>();
+            foreach (HotFileInfo item in downLoadList)
+            {
+                downloadQueue.Enqueue(item);
+            }
         }
 
         /// <summary>
@@ -97,7 +146,7 @@ namespace ZMAssetFrameWork
         public void CheckAssetsVersion(Action<bool, float> checkCallBack)
         {
             GeneratorHotAssetsManifest();
-
+            _needDownLoadAssetsList.Clear();
             _monoBehaviour.StartCoroutine(DownLoadHotAssetsManifest(() =>
             {
                 //资源下载完成
