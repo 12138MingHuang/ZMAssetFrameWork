@@ -75,6 +75,16 @@ namespace ZMAssetFrameWork
         /// 资源下载器
         /// </summary>
         private AssetsDownLoader _assetsDownLoader;
+        
+        /// <summary>
+        /// AssetBundle配置文件下载完成监听
+        /// </summary>
+        public Action<string> OnDownLoadABConfigListener;
+        
+        /// <summary>
+        /// 下载AssetBundle完成的回调
+        /// </summary>
+        public Action<string> OnDownLoadAssetBundleListener;
 
         /// <summary>
         /// Mono脚本
@@ -100,17 +110,17 @@ namespace ZMAssetFrameWork
             if (isCheckAssetsVersion)
             {
                 //检测资源版本是否需要热更
-                CheckAssetsVersion(((isHot, size) =>
+                CheckAssetsVersion((isHot, size) =>
                 {
                     if (isHot)
                     {
-                        
+                        StartDownLoadHotAssets(startDownLoadCallBack);
                     }
                     else
                     {
                         onDownLoadAllAssetsFinish?.Invoke(CurBundleModuleEnum);
                     }
-                }));
+                });
             }
         }
 
@@ -293,19 +303,36 @@ namespace ZMAssetFrameWork
 
         #region 资源下载回调
         
-        public void DownLoadAssetBundleSuccess(HotFileInfo hotFileInfo)
+        private void DownLoadAssetBundleSuccess(HotFileInfo hotFileInfo)
+        {
+            // string abName = hotFileInfo.abName.Replace(".unity", "");
+            string abName = hotFileInfo.abName.Replace(".ab", "");
+            if (hotFileInfo.abName.Contains("bundleconfig"))
+            {
+                OnDownLoadABConfigListener?.Invoke(abName);
+                //如果下载成功需要及时去加载配置文件
+                // TODO
+            }
+            else
+            {
+                OnDownLoadAssetBundleListener.Invoke(abName);
+            }
+        }
+        
+        private void DownLoadAssetBundleFailed(HotFileInfo hotFileInfo)
         {
             
         }
         
-        public void DownLoadAssetBundleFailed(HotFileInfo hotFileInfo)
+        private void DownLoadAssetBundleFinish(HotFileInfo hotFileInfo)
         {
-            
-        }
-        
-        public void DownLoadAssetBundleFinish(HotFileInfo hotFileInfo)
-        {
-            
+            if (File.Exists(_localHotAssetsManifestPath))
+            {
+                File.Delete(_localHotAssetsManifestPath);
+            }
+            //把服务端热更清单文件拷贝到本地
+            File.Copy(_serverHotAssetsManifestPath, _localHotAssetsManifestPath);
+            onDownLoadAllAssetsFinish?.Invoke(CurBundleModuleEnum);
         }
         
         #endregion
