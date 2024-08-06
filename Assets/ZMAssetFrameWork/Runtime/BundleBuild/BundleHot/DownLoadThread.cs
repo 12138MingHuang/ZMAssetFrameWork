@@ -69,8 +69,8 @@ namespace ZMAssetFrameWork
         {
             _curHotAssetsModule = assetsModule;
             _hotFileInfo = hotFileInfo;
-            _downLoadURL = downLoadURL;
-            _fileSavePath = fileSavePath;
+            _downLoadURL = downLoadURL + "/" + hotFileInfo.abName;
+            _fileSavePath = fileSavePath + "/" + hotFileInfo.abName;
         }
 
         /// <summary>

@@ -282,7 +282,7 @@ namespace ZMAssetFrameWork
             {
                 try
                 {
-                    Debug.LogError("*** Request AssetBundle HotAssetsManifest Url Finish Module:" + CurBundleModuleEnum + "text:" + webRequest.downloadHandler.text);
+                    Debug.Log("*** Request AssetBundle HotAssetsManifest Url Finish Module:" + CurBundleModuleEnum + " text:" + webRequest.downloadHandler.text);
                     //写入服务端资源热更清单到本地
                     FileHelper.WriteFile(_serverHotAssetsManifestPath, webRequest.downloadHandler.data);
                     _serverHotAssetsManifest = JsonConvert.DeserializeObject<HotAssetsManifest>(webRequest.downloadHandler.text);
@@ -336,5 +336,10 @@ namespace ZMAssetFrameWork
         }
         
         #endregion
+
+        public void OnMainThreadUpdate()
+        {
+            _assetsDownLoader?.OnMainThreadUpdate();
+        }
     }
 }
