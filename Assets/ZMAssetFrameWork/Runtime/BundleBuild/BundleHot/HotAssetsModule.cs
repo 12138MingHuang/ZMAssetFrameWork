@@ -72,6 +72,11 @@ namespace ZMAssetFrameWork
         public float assetsDownLoadSizeM;
 
         /// <summary>
+        /// 资源下载器
+        /// </summary>
+        private AssetsDownLoader _assetsDownLoader;
+
+        /// <summary>
         /// Mono脚本
         /// </summary>
         private MonoBehaviour _monoBehaviour;
@@ -137,6 +142,13 @@ namespace ZMAssetFrameWork
             {
                 downloadQueue.Enqueue(item);
             }
+            //通过资源下载器，开始下载资源
+            _assetsDownLoader = new AssetsDownLoader(this, downloadQueue, _serverHotAssetsManifest.downLoadURL, HotAssetsSavePath
+                , DownLoadAssetBundleSuccess, DownLoadAssetBundleFailed, DownLoadAssetBundleFinish);
+            
+            startDownLoadCallBack?.Invoke();
+            //开始下载队列中的资源
+            _assetsDownLoader.StartDownLoadNextBundle();
         }
 
         /// <summary>
@@ -278,5 +290,24 @@ namespace ZMAssetFrameWork
             _serverHotAssetsManifestPath = Application.persistentDataPath + "/Server" + CurBundleModuleEnum + "AssetsHotManifest.json";
             _localHotAssetsManifestPath = Application.persistentDataPath + "/Local" + CurBundleModuleEnum + "AssetsHotManifest.json";
         }
+
+        #region 资源下载回调
+        
+        public void DownLoadAssetBundleSuccess(HotFileInfo hotFileInfo)
+        {
+            
+        }
+        
+        public void DownLoadAssetBundleFailed(HotFileInfo hotFileInfo)
+        {
+            
+        }
+        
+        public void DownLoadAssetBundleFinish(HotFileInfo hotFileInfo)
+        {
+            
+        }
+        
+        #endregion
     }
 }
