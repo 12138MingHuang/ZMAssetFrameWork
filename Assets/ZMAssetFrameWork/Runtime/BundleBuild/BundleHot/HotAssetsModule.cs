@@ -315,7 +315,7 @@ namespace ZMAssetFrameWork
             }
             else
             {
-                OnDownLoadAssetBundleListener.Invoke(abName);
+                OnDownLoadAssetBundleListener?.Invoke(abName);
             }
         }
         

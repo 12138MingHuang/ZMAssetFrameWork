@@ -99,11 +99,12 @@ namespace ZMAssetFrameWork
                     FileStream fileStream = File.Create(_fileSavePath);
                     using (Stream stream = response.GetResponseStream())
                     {
-                        //文件下载异常
-                        if (stream == null || stream.Length == 0)
-                        {
-                            Debug.LogError("File DownLoad exception please check file fileName:" + _hotFileInfo.abName + "fileURL:" + _downLoadURL);
-                        }
+                        // //文件下载异常发生 System.NotSupportedException: This stream does not support seek operations.
+                        // //异常的原因是某些流（例如 NetworkStream 或 HttpWebResponseStream）不支持对 Length 属性的访问或其他 seek 操作。这些流通常只能顺序读取，因此无法提供长度信息。
+                        // if (stream == null || stream.Length == 0)
+                        // {
+                        //     Debug.LogError("File DownLoad exception please check file fileName:" + _hotFileInfo.abName + "fileURL:" + _downLoadURL);
+                        // }
                         byte[] buffer = new byte[512];
                         //从字节流中读取字节，读取到buff数组中
                         int size = stream.Read(buffer, 0, buffer.Length);
