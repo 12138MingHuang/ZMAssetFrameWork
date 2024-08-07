@@ -18,3 +18,5 @@ MonoBehaviour:
     encryptKey: zhangbin
   buildAssetBundleOptions: 256
   buildTarget: 13
+  bundleHotType: 1
+  MAX_THREAD_COUNT: 3

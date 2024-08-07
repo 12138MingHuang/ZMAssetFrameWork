@@ -4,6 +4,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// AssetBundle热更模式
+/// </summary>
+public enum BundleHotEnum
+{
+    /// <summary>
+    /// 不热更
+    /// </summary>
+    NoHot,
+    
+    /// <summary>
+    /// 热更
+    /// </summary>
+    Hot,
+}
+
 [CreateAssetMenu(menuName = "AssetBundleSettings", fileName = "AssetBundleSettings", order = 0)]
 public class BundleSettings : ScriptableObject
 {
@@ -28,6 +44,14 @@ public class BundleSettings : ScriptableObject
     [TitleGroup("AssetBundle打包设置")]
     [LabelText("资源打包平台")]
     public BuildTarget buildTarget = BuildTarget.Android;
+    
+    [TitleGroup("AssetBundle打包设置")]
+    [LabelText("资源热更模式")]
+    public BundleHotEnum bundleHotType = BundleHotEnum.Hot;
+    
+    [TitleGroup("AssetBundle打包设置")]
+    [LabelText("最大下载线程数量")]
+    public int MAX_THREAD_COUNT;
 }
 
 [Serializable]
