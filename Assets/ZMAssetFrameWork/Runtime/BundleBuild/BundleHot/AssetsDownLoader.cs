@@ -33,7 +33,7 @@ namespace ZMAssetFrameWork
         /// <summary>
         /// 最大下载线程个数
         /// </summary>
-        public const int MAX_THREAD_COUNT = 3;
+        public int MAX_THREAD_COUNT = 3;
         
         /// <summary>
         /// 资源文件下载地址

@@ -341,5 +341,18 @@ namespace ZMAssetFrameWork
         {
             _assetsDownLoader?.OnMainThreadUpdate();
         }
+
+        /// <summary>
+        /// 设置下载线程个数
+        /// </summary>
+        /// <param name="threadCount">下载线程个数</param>
+        public void SetDownLoadThreadCount(int threadCount)
+        {
+            Debug.Log("多线程负载均衡：" + threadCount + " ModuleType:" + CurBundleModuleEnum);
+            if(_assetsDownLoader != null)
+            {
+                _assetsDownLoader.MAX_THREAD_COUNT = threadCount;
+            }
+        }
     }
 }

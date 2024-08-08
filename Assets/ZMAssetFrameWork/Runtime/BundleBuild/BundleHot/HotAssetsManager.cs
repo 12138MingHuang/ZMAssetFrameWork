@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace ZMAssetFrameWork
 {
@@ -122,14 +123,29 @@ namespace ZMAssetFrameWork
             return assetsModule;
         }
         
+        /// <summary>
+        /// 检测资源版本是否需要热更
+        /// </summary>
+        /// <param name="bundleModuleEnum">热更模块</param>
+        /// <param name="callBack">热更回调</param>
         public void CheckAssetsVersion(BundleModuleEnum bundleModuleEnum, Action<bool, float> callBack)
         {
-            throw new NotImplementedException();
+            HotAssetsModule assetsModule = GetOrNewAssetsModule(bundleModuleEnum);
+            assetsModule.CheckAssetsVersion(callBack);
         }
         
+        /// <summary>
+        /// 获取热更模块
+        /// </summary>
+        /// <param name="bundleModuleEnum">热更模块类型</param>
+        /// <returns>热更模块</returns>
         public HotAssetsModule GetHotAssetsModule(BundleModuleEnum bundleModuleEnum)
         {
-            throw new NotImplementedException();
+            if(_allAssetsModuleDic.ContainsKey(bundleModuleEnum))
+            {
+                return _allAssetsModuleDic[bundleModuleEnum];
+            }
+            return null;
         }
         
         /// <summary>
@@ -168,12 +184,52 @@ namespace ZMAssetFrameWork
         /// </summary>
         public void MultipleThreadBalancing()
         {
-            
+            //获取当前正在下载热更资源模块的一个长度个数
+            int count = _downLoadingAssetsModuleDic.Count;
+            //计算多线程均衡后的线程分配个数
+            //以最大下载线程个数3 举例子
+            //1. 3/1=3 最大并发下载线程个数是3 （偶数）
+            //2. 3/2=1.5 向上取整 最大并发下载线程个数是2 （奇数）
+            //3. 3/3=1 每一个模块都拥有一个下载线程
+            float threadCount = MAX_THREAD_COUNT / 1.0f / count;
+            //主下载线程个数
+            int mainThreadCount = 0;
+            //通过(int)进行强转 (int)强转：向下取整
+            int threadBalancingCount = (int)threadCount;
+
+            if ((int)threadCount < threadCount)
+            {
+                //向上取整
+                mainThreadCount = Mathf.CeilToInt(threadCount);
+                //向下取整
+                threadBalancingCount = Mathf.FloorToInt(threadCount);
+            }
+            //多线程均衡
+            int i = 0;
+            foreach(HotAssetsModule item in _downLoadingAssetsModuleDic.Values)
+            {
+                //如果当前下载线程个数小于主下载线程个数，则把当前下载线程个数+1
+                if (mainThreadCount != 0 && i == 0)
+                {
+                    item.SetDownLoadThreadCount(mainThreadCount);//设置主线程下载个数
+                }
+                else
+                {
+                    item.SetDownLoadThreadCount(threadBalancingCount);
+                }
+                i++;
+            }
         }
         
+        /// <summary>
+        /// 主线程更新
+        /// </summary>
         public void OnMainThreadUpdate()
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < _downLoadAssetsModuleList.Count; i++)
+            {
+                _downLoadAssetsModuleList[i].OnMainThreadUpdate();
+            }
         }
     }
 }
