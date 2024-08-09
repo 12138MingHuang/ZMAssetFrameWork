@@ -32,7 +32,7 @@ namespace ZMAssetFrameWork
         /// <param name="bundleModuleEnum">解压资源模块</param>
         /// <param name="callback">解压完成回调</param>
         /// <returns>解压的内嵌文件</returns>
-        public override IDecompressAssets startDecompressBuiltinFile(BundleModuleEnum bundleModuleEnum, Action callback)
+        public override IDecompressAssets StartDecompressBuiltinFile(BundleModuleEnum bundleModuleEnum, Action callback)
         {
             if(ComputeDecompressFile(bundleModuleEnum))
             {

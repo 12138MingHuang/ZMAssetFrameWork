@@ -4,9 +4,58 @@ namespace ZMAssetFrameWork
 {
     public class HotUpdateManager : Singleton<HotUpdateManager>
     {
+        /// <summary>
+        /// 热更且解压游戏内嵌资源
+        /// </summary>
+        /// <param name="bundleModuleEnum">热更资源类型</param>
+        public void HotAndUnPackAssets(BundleModuleEnum bundleModuleEnum)
+        {
+            //开始解压游戏内嵌资源
+            ZMAssetsFrame.StartDecompressBuiltinFile(bundleModuleEnum, () =>
+            {
+                //说明资源开启解压了
+                if(Application.internetReachability == NetworkReachability.NotReachable)
+                {
+                    InstantiateResourcesObj<UpdateTipsWindow>("UpdateTipsWindow").InitView("当前没有网络，请检测网络重试？", () =>
+                    {
+                        NotNetButtonClick(bundleModuleEnum);
+                    }, () =>
+                    {
+                        NotNetButtonClick(bundleModuleEnum);
+                    });
+                    return;
+                }
+                else
+                {
+                    CheckAssetsVersion(bundleModuleEnum);
+                }
+            });
+        }
+        
+        /// <summary>
+        /// 没有网络情况更新
+        /// </summary>
+        /// <param name="bundleModuleEnum">热更资源类型</param>
+        public void NotNetButtonClick(BundleModuleEnum bundleModuleEnum)
+        {
+            //如果没有网络，弹出弹窗提示，提示用户没有网络
+            if(Application.internetReachability != NetworkReachability.NotReachable)
+            {
+                CheckAssetsVersion(bundleModuleEnum);
+            }
+            else
+            {
+                
+            }
+        }
+        
+        /// <summary>
+        /// 开始热更检测
+        /// </summary>
+        /// <param name="bundleModuleEnum">热更资源类型</param>
         public void CheckAssetsVersion(BundleModuleEnum bundleModuleEnum)
         {
-            ZMAssetsFrame.Instance.CheckAssetsVersion(bundleModuleEnum, (isHot, sizeM) =>
+            ZMAssetsFrame.CheckAssetsVersion(bundleModuleEnum, (isHot, sizeM) =>
             {
                 if (isHot)
                 {
@@ -56,7 +105,7 @@ namespace ZMAssetFrameWork
         /// <param name="bundleModuleEnum">热更模块</param>
         public void StartHotAssets(BundleModuleEnum bundleModuleEnum)
         {
-            ZMAssetsFrame.Instance.HotAssets(bundleModuleEnum, OnStartHotAssetsCallBack, OnHotFinishCallBack, null, false);
+            ZMAssetsFrame.HotAssets(bundleModuleEnum, OnStartHotAssetsCallBack, OnHotFinishCallBack, null, false);
         }
 
         /// <summary>

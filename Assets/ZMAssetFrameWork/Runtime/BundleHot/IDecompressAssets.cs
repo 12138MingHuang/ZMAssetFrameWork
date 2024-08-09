@@ -26,7 +26,7 @@ namespace ZMAssetFrameWork
         /// 开始解压内嵌文件
         /// </summary>
         /// <returns>解压的文件</returns>
-        public abstract IDecompressAssets startDecompressBuiltinFile(BundleModuleEnum bundleModuleEnum, Action callback);
+        public abstract IDecompressAssets StartDecompressBuiltinFile(BundleModuleEnum bundleModuleEnum, Action callback);
 
 
         /// <summary>
