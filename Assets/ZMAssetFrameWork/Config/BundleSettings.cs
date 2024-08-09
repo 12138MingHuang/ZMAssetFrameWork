@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ZMAssetFrameWork;
 
 /// <summary>
 /// AssetBundle热更模式
@@ -52,6 +53,55 @@ public class BundleSettings : ScriptableObject
     [TitleGroup("AssetBundle打包设置")]
     [LabelText("最大下载线程数量")]
     public int MAX_THREAD_COUNT;
+    
+    [Title("AssetBundle热更文件存储路径")]
+    private string HotAssetsPath
+    {
+        get { return Application.persistentDataPath + "/HotAssets/"; }
+    }
+
+    [Title("AssetBundle解压文件存储路径")]
+    private string BundleDecompressPath
+
+    {
+        get { return Application.persistentDataPath + "/DecompressAssets/"; }
+    }
+    
+    [Title("AssetBundle内嵌文件存储路径")]
+    private string BuiltinAssetsPath
+    {
+        get { return Application.persistentDataPath + "/AssetBundle/"; }
+    }
+    
+    /// <summary>
+    /// 获取热更文件存储路径
+    /// </summary>
+    /// <param name="bundleModuleEnum">热更资源类型</param>
+    /// <returns>热更文件存储路径</returns>
+    public string GetHotAssetsPath(BundleModuleEnum bundleModuleEnum)
+    {
+        return HotAssetsPath + bundleModuleEnum.ToString() + "/";
+    }
+
+    /// <summary>
+    /// 获取解压文件存储路径
+    /// </summary>
+    /// <param name="bundleModuleEnum">热更资源类型</param>
+    /// <returns>解压文件存储路径</returns>
+    public string GetAssetsDecompressPath(BundleModuleEnum bundleModuleEnum)
+    {
+        return BundleDecompressPath + bundleModuleEnum.ToString() + "/";
+    }
+
+    /// <summary>
+    /// 获取内嵌文件存储路径
+    /// </summary>
+    /// <param name="bundleModuleEnum">热更资源类型</param>
+    /// <returns>内嵌文件存储路径</returns>
+    public string GetAssetsBuiltinBundlePath(BundleModuleEnum bundleModuleEnum)
+    {
+        return BuiltinAssetsPath + bundleModuleEnum.ToString() + "/";
+    }
 }
 
 [Serializable]
