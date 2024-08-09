@@ -52,6 +52,14 @@ namespace ZMAssetFrameWork
         private string _localHotAssetsManifestPath;
 
         /// <summary>
+        /// 热更公告
+        /// </summary>
+        public string UpdateNoticeContent
+        {
+            get { return _serverHotAssetsManifest.updateNotice; }
+        }
+        
+        /// <summary>
         /// 当前下载的资源模块类型
         /// </summary>
         public BundleModuleEnum CurBundleModuleEnum { get; set; }
@@ -64,7 +72,7 @@ namespace ZMAssetFrameWork
         /// <summary>
         /// 最大下载资源大小
         /// </summary>
-        private float AssetsMaxSizeM { get; set; }
+        public float AssetsMaxSizeM { get; set; }
 
         /// <summary>
         /// 资源已经下载大小
