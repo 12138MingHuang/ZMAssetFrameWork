@@ -117,7 +117,7 @@ namespace ZMAssetFrameWork
             }
             else
             {
-                assetsModule = new HotAssetsModule(bundleModuleEnum, null);
+                assetsModule = new HotAssetsModule(bundleModuleEnum, ZMAssetsFrame.Instance);
                 _allAssetsModuleDic.Add(bundleModuleEnum, assetsModule);
             }
             return assetsModule;
