@@ -292,6 +292,7 @@ namespace ZMAssetFrameWork
                     Debug.LogError("服务端资源清单配置下载异常，文件不存在或者配置有问题，更新出错，请检查：" + e.ToString());
                 }
             }
+            webRequest.Dispose();
             downLoadFinish?.Invoke();
         }
 
