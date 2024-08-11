@@ -70,7 +70,7 @@ public class BundleSettings : ScriptableObject
     [Title("AssetBundle内嵌文件存储路径")]
     private string BuiltinAssetsPath
     {
-        get { return Application.persistentDataPath + "/AssetBundle/"; }
+        get { return Application.streamingAssetsPath + "/AssetBundle/"; }
     }
     
     /// <summary>

@@ -10,10 +10,12 @@ public class Test : MonoBehaviour
     private void Awake()
     {
         ZMAssetsFrame.Instance.InitFrameWork();
+        Debug.Log(Application.persistentDataPath);
     }
 
     private void Start()
     {
-        HotUpdateManager.Instance.CheckAssetsVersion(BundleModuleEnum.Game);
+        // HotUpdateManager.Instance.CheckAssetsVersion(BundleModuleEnum.Game);
+        HotUpdateManager.Instance.HotAndUnPackAssets(BundleModuleEnum.Game);
     }
 }

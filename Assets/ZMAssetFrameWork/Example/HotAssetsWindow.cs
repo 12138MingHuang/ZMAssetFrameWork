@@ -32,6 +32,7 @@ public class HotAssetsWindow : MonoBehaviour
     /// <param name="assetsModule">热更资源</param>
     public void ShowHotAssetsProgress(HotAssetsModule assetsModule)
     {
+        _decompressAssets = null;
         progressText.text = "";
         progressSlider.value = 0;
         _hotAssetsModule = assetsModule;
@@ -41,14 +42,16 @@ public class HotAssetsWindow : MonoBehaviour
     
     private void Update()
     {
-        if (_decompressAssets != null && _decompressAssets.IsStartDecompress)
+        if (_decompressAssets != null && progressSlider.value != 1.0f)
         {
+            // Debug.Log("mDecompressAssets.GetDecompressProgress():"+ _decompressAssets.GetDecompressProgress());
             progressText.text = "资源解压中,过程中不消耗流量...";
             progressSlider.value = _decompressAssets.GetDecompressProgress();
         }
 
-        if (_hotAssetsModule != null)
+        if (_hotAssetsModule != null && progressSlider.value != 1.0f)
         {
+            // Debug.Log("AssetsDownLoadSizeM:" + _hotAssetsModule.assetsDownLoadSizeM + " AssetsMaxSizeM:"+ _hotAssetsModule.AssetsMaxSizeM);
             progressText.text = $"资源下载中...{_hotAssetsModule.assetsDownLoadSizeM:F1}M/{_hotAssetsModule.AssetsMaxSizeM:F1}M";
             progressSlider.value = _hotAssetsModule.assetsDownLoadSizeM / _hotAssetsModule.AssetsMaxSizeM;
         }

@@ -5,13 +5,20 @@ namespace ZMAssetFrameWork
     public class HotUpdateManager : Singleton<HotUpdateManager>
     {
         /// <summary>
+        /// 热更窗口
+        /// </summary>
+        private HotAssetsWindow _hotAssetsWindow;
+        
+        /// <summary>
         /// 热更且解压游戏内嵌资源
         /// </summary>
         /// <param name="bundleModuleEnum">热更资源类型</param>
         public void HotAndUnPackAssets(BundleModuleEnum bundleModuleEnum)
         {
+            _hotAssetsWindow = InstantiateResourcesObj<HotAssetsWindow>("HotAssetsWindow");
+            
             //开始解压游戏内嵌资源
-            ZMAssetsFrame.StartDecompressBuiltinFile(bundleModuleEnum, () =>
+            IDecompressAssets decompressAssets = ZMAssetsFrame.StartDecompressBuiltinFile(bundleModuleEnum, () =>
             {
                 //说明资源开启解压了
                 if(Application.internetReachability == NetworkReachability.NotReachable)
@@ -30,6 +37,9 @@ namespace ZMAssetFrameWork
                     CheckAssetsVersion(bundleModuleEnum);
                 }
             });
+            
+            //更新解压进度
+            _hotAssetsWindow.ShowDecompressProgress(decompressAssets);
         }
         
         /// <summary>
@@ -106,6 +116,8 @@ namespace ZMAssetFrameWork
         public void StartHotAssets(BundleModuleEnum bundleModuleEnum)
         {
             ZMAssetsFrame.HotAssets(bundleModuleEnum, OnStartHotAssetsCallBack, OnHotFinishCallBack, null, false);
+            //更新热更进度
+            _hotAssetsWindow.ShowHotAssetsProgress(ZMAssetsFrame.GetHotAssetsModule(bundleModuleEnum));
         }
 
         /// <summary>

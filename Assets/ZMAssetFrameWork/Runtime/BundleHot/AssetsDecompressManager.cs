@@ -45,7 +45,7 @@ namespace ZMAssetFrameWork
                 Debug.Log("不需要解压文件");
                 callback?.Invoke();
             }
-            return null;
+            return this;
         }
 
         /// <summary>
@@ -103,6 +103,7 @@ namespace ZMAssetFrameWork
         /// <returns>解压进度</returns>
         public override float GetDecompressProgress()
         {
+            if (TotalSizem <= 0) return 1;
             return AlreadyDecompressSize / TotalSizem;
         }
 
@@ -136,10 +137,14 @@ namespace ZMAssetFrameWork
                 {
                     //到了这一步，文件就已经读取完成了
                     byte[] fileBytes = unityWebRequest.downloadHandler.data;
-                    FileHelper.WriteFile(_decompressPath + fileName, fileBytes);
-                    AlreadyDecompressSize += fileBytes.Length / 1024.0f / 1024.0f;
-                    Debug.Log("AlreadyDecompressSize:" + AlreadyDecompressSize + " TotalSizem:" + TotalSizem);
-                    Debug.Log("UnPack Finish " + _decompressPath + fileName);
+                    if (fileBytes != null)
+                    {
+                        FileHelper.WriteFile(_decompressPath + fileName, fileBytes);
+                        AlreadyDecompressSize += fileBytes.Length / 1024.0f / 1024.0f;
+                        Debug.Log("AlreadyDecompressSize:" + AlreadyDecompressSize + " TotalSizem:" + TotalSizem);
+                        Debug.Log("UnPack Finish " + _decompressPath + fileName);
+                    }
+                        
                 }
                 unityWebRequest.Dispose();
             }

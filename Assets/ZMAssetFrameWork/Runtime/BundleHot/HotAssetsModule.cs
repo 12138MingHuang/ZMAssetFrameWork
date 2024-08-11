@@ -216,7 +216,7 @@ namespace ZMAssetFrameWork
             {
                 Directory.CreateDirectory(HotAssetsSavePath);
             }
-
+            AssetsMaxSizeM = 0;
             foreach (HotFileInfo item in serverHotAssetsPatch.hotAssetsList)
             {
                 //获取本地AssetBundle文件路径
