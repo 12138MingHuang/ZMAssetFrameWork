@@ -136,6 +136,7 @@ namespace ZMAssetFrameWork
         public void OnHotFinishCallBack(BundleModuleEnum bundleModuleEnum)
         {
             Debug.Log("OnHotFinishCallBack.....");
+            AssetBundleManager.Instance.LoadAssetBundleConfig(bundleModuleEnum);
         }
     }
 }
