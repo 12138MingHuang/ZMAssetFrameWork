@@ -64,6 +64,31 @@ namespace ZMAssetFrameWork
         private ClassObjectPool<CacheObject> _cacheObjectPool = new ClassObjectPool<CacheObject>(300);
 
         /// <summary>
+        /// 异步加载任务列表
+        /// </summary>
+        private List<long> _asyncLoadingTaskList = new List<long>();
+
+        /// <summary>
+        /// 异步加载任务唯一id
+        /// </summary>
+        private long _asyncGuid;
+
+        /// <summary>
+        /// 异步加载任务唯一id
+        /// </summary>
+        public long asyncTaskGuid
+        {
+            get
+            {
+                if(_asyncGuid > long.MaxValue)
+                {
+                    _asyncGuid = 0;
+                }
+                return _asyncGuid++;
+            }
+        }
+
+        /// <summary>
         /// 同步克隆物体
         /// </summary>
         /// <param name="path">资源路径</param>
@@ -141,7 +166,46 @@ namespace ZMAssetFrameWork
             }
             return null;
         }
-        
+
+        /// <summary>
+        /// 异步克隆对象
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="loadAsync">异步加载回调</param>
+        /// <param name="param1">异步加载参数1</param>
+        /// <param name="param2">异步加载参数2</param>
+        public void InstantiateAsync(string path, System.Action<GameObject, object, object> loadAsync, object param1 = null, object param2 = null)
+        {
+            path = path.EndsWith(".prefab") ? path : (path + ".prefab");
+            //先从对象池中查询这个对象，如果存在就直接使用
+            GameObject cacheObj = GetCacheObjFormPools(Crc32.GetCrc32(path));
+            if (cacheObj != null)
+            {
+                loadAsync?.Invoke(null, cacheObj, null);
+                return;
+            }
+            //获取异步加载任务唯一id
+            long guid = asyncTaskGuid;
+            _asyncLoadingTaskList.Add(guid);
+            //开始异步加载资源
+            LoadResourceAsync<GameObject>(path, (obj) =>
+            {
+                //异步加载完成
+                if (obj != null)
+                {
+                    if(_asyncLoadingTaskList.Contains(guid))
+                    {
+                        _asyncLoadingTaskList.Remove(guid);
+                        GameObject newObj = Instantiate(path, (GameObject)obj, null);
+                    }
+                }
+                else
+                {
+                    _asyncLoadingTaskList.Remove(guid);
+                    Debug.LogError("GameObject Async load failed, Path: " + path);
+                }
+            });
+        }
         #region 资源加载
         /// <summary>
         /// 同步加载资源，外部直接调用，仅仅加载不需要实例化的资源
