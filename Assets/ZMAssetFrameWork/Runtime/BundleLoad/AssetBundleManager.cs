@@ -80,7 +80,9 @@ namespace ZMAssetFrameWork
         /// <returns>是否生成路径成功</returns>
         public bool GeneratorBundleConfigPath(BundleModuleEnum bundleModuleEnum)
         {
-            _assetsBundleConfigName = bundleModuleEnum.ToString().ToLower() + "AssetBundleConfig";
+            _assetsBundleConfigName = bundleModuleEnum.ToString() + "AssetBundleConfig";
+            //这里的文件读取失败是AssetBundle后缀引起的，高版本Unity自动会自动读取,unity文件,导致文件大小异常，解决方案:建议不要AssetBundle后缀,或更换后缀
+            // _bundleConfigName = bundleModuleEnum.ToString().ToLower() + "bundleconfig.unity";
             _bundleConfigName = bundleModuleEnum.ToString().ToLower() + "bundleconfig.ab";
             _bundleConfigPath = BundleSettings.Instance.GetHotAssetsPath(bundleModuleEnum) + _bundleConfigName;
             //如果配置文件存在，return true 如果不存在就直接从内嵌解压的资源中去加载

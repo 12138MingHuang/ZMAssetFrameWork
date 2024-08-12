@@ -314,6 +314,7 @@ namespace ZMAssetFrameWork
         
         private void DownLoadAssetBundleSuccess(HotFileInfo hotFileInfo)
         {
+            //这里的文件读取失败是AssetBundle后缀引起的，高版本Unity自动会自动读取,unity文件,导致文件大小异常，解决方案:建议不要AssetBundle后缀,或更换后缀
             // string abName = hotFileInfo.abName.Replace(".unity", "");
             string abName = hotFileInfo.abName.Replace(".ab", "");
             if (hotFileInfo.abName.Contains("bundleconfig"))

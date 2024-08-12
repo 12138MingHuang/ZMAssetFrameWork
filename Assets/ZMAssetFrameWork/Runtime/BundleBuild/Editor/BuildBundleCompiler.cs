@@ -457,8 +457,8 @@ namespace ZMAssetFrameWork
             if (assetImporter != null)
             {
                 //这里的文件读取失败是AssetBundle后缀引起的，高版本Unity自动会自动读取,unity文件,导致文件大小异常，解决方案:建议不要AssetBundle后缀,或更换后缀
-                // assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "BundleConfig.unity";
-                assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "BundleConfig.ab";
+                // assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig.unity";
+                assetImporter.assetBundleName = _bundleModuleEnum.ToString().ToLower() + "bundleconfig.ab";
             }
             
         }
@@ -584,7 +584,8 @@ namespace ZMAssetFrameWork
         {
             FileHelper.DeleteFolder(HotAssetsOutPutPath);
             Directory.CreateDirectory(HotAssetsOutPutPath);
-            
+            //这里的文件读取失败是AssetBundle后缀引起的，高版本Unity自动会自动读取,unity文件,导致文件大小异常，解决方案:建议不要AssetBundle后缀,或更换后缀
+            // string[] bundlePathArr = Directory.GetFiles(BundleOutPutPath, "*.unity");
             string[] bundlePathArr = Directory.GetFiles(BundleOutPutPath, "*.ab");
             for (int i = 0; i < bundlePathArr.Length; i++)
             {
@@ -613,6 +614,8 @@ namespace ZMAssetFrameWork
             
             //计算热更补丁文件信息
             DirectoryInfo directoryInfo = new DirectoryInfo(HotAssetsOutPutPath);
+            //这里的文件读取失败是AssetBundle后缀引起的，高版本Unity自动会自动读取,unity文件,导致文件大小异常，解决方案:建议不要AssetBundle后缀,或更换后缀
+            // FileInfo[] bundleInfoArr = directoryInfo.GetFiles("*.unity");
             FileInfo[] bundleInfoArr = directoryInfo.GetFiles("*.ab");
             foreach (FileInfo bundleInfo in bundleInfoArr)
             {
