@@ -4,12 +4,143 @@ using UnityEngine;
 
 namespace ZMAssetFrameWork
 {
+    /// <summary>
+    /// 缓存对象
+    /// </summary>
+    public class CacheObject
+    {
+        /// <summary>
+        /// 缓存对象的crc
+        /// </summary>
+        public uint crc;
+        
+        /// <summary>
+        /// 缓存对象的路径
+        /// </summary>
+        public string path;
+        
+        /// <summary>
+        /// 缓存对象的id
+        /// </summary>
+        public int insId;
+        
+        /// <summary>
+        /// 缓存对象实体
+        /// </summary>
+        public UnityEngine.GameObject obj;
+
+        /// <summary>
+        /// 释放缓存对象
+        /// </summary>
+        public void Release()
+        {
+            crc = 0;
+            path = "";
+            insId = 0;
+            obj = null;
+        }
+    }
+    
     public class ResourceManager
     {
         /// <summary>
-        /// 已经加载的资源
+        /// 已经加载的资源 key 未资源路径crc value为资源对象
         /// </summary>
         private Dictionary<uint, BundleItem> _alReadyAssetDic = new Dictionary<uint, BundleItem>();
+
+        /// <summary>
+        /// 对象池字典
+        /// </summary>
+        private Dictionary<uint, List<CacheObject>> _objectPoolDic = new Dictionary<uint, List<CacheObject>>();
+
+        /// <summary>
+        /// 所有的对象缓存字典
+        /// </summary>
+        private Dictionary<int, CacheObject> _allObjectDic = new Dictionary<int, CacheObject>();
+        
+        /// <summary>
+        /// 缓存对象的对象池
+        /// </summary>
+        private ClassObjectPool<CacheObject> _cacheObjectPool = new ClassObjectPool<CacheObject>(300);
+
+        /// <summary>
+        /// 同步克隆物体
+        /// </summary>
+        /// <param name="path">资源路径</param>
+        /// <param name="parent">物体所在父物体</param>
+        /// <param name="localPosition">局部位置</param>
+        /// <param name="localScale">局部缩放</param>
+        /// <param name="quaternion">旋转</param>
+        /// <returns>克隆得到物体</returns>
+        public GameObject Instantiate(string path, Transform parent, Vector3 localPosition, Vector3 localScale, Quaternion quaternion)
+        {
+            path = path.EndsWith(".prefab") ? path : (path + ".prefab");
+            //先从对象池中查询这个对象，如果存在就直接使用
+            GameObject cacheObj = GetCacheObjFormPools(Crc32.GetCrc32(path));
+            if (cacheObj != null)
+            {
+                cacheObj.transform.SetParent(parent);
+                cacheObj.transform.localPosition = localPosition;
+                cacheObj.transform.localScale = localScale;
+                cacheObj.transform.localRotation = quaternion;
+                return cacheObj;
+            }
+            //加载该对象
+            GameObject obj = LoadResource<GameObject>(path);
+            if (obj != null)
+            {
+                GameObject newObj = Instantiate(path, obj, parent);
+                newObj.transform.localPosition = localPosition;
+                newObj.transform.localScale = localScale;
+                newObj.transform.localRotation = quaternion;
+                return newObj;
+            }
+            else
+            {
+                Debug.LogError("GameObject load failed, path is null");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 克隆一个对象
+        /// </summary>
+        /// <param name="path">资源路径</param>
+        /// <param name="obj">对象</param>
+        /// <param name="parent">物体所在父物体</param>
+        /// <returns>克隆所得到的对象</returns>
+        private GameObject Instantiate(string path, GameObject obj, Transform parent)
+        {
+            obj = GameObject.Instantiate(obj, parent, false);
+            CacheObject cacheObj = _cacheObjectPool.Spawn();
+            cacheObj.obj = obj;
+            cacheObj.path = path;
+            cacheObj.crc = Crc32.GetCrc32(path);
+            cacheObj.insId = obj.GetInstanceID();
+            
+            //将对象添加到对象池中
+            _allObjectDic.Add(cacheObj.insId, cacheObj);
+            return obj;
+        }
+        
+        /// <summary>
+        /// 从对象池中获取对象
+        /// </summary>
+        /// <param name="crc">对象的路径crc</param>
+        /// <returns>获取的对象</returns>
+        private GameObject GetCacheObjFormPools(uint crc)
+        {
+            List<CacheObject> cacheObjectList = null;
+            _objectPoolDic.TryGetValue(crc, out cacheObjectList);
+            if (cacheObjectList != null && cacheObjectList.Count > 0)
+            {
+                //直接去对象池中的第0个对象
+                CacheObject cacheObj = cacheObjectList[0];
+                cacheObjectList.RemoveAt(0);
+                return cacheObj.obj;
+            }
+            return null;
+        }
         
         #region 资源加载
         /// <summary>
