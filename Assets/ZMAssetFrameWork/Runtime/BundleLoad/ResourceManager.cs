@@ -11,6 +11,7 @@ namespace ZMAssetFrameWork
         /// </summary>
         private Dictionary<uint, BundleItem> _alReadyAssetDic = new Dictionary<uint, BundleItem>();
         
+        #region 资源加载
         /// <summary>
         /// 同步加载资源，外部直接调用，仅仅加载不需要实例化的资源
         /// </summary>
@@ -70,6 +71,83 @@ namespace ZMAssetFrameWork
             _alReadyAssetDic.Add(crc, bundleItem);
             return obj;
         }
+
+        /// <summary>
+        /// 异步加载资源，外部直接调用，仅仅加载不需要实例化的资源
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <typeparam name="T">资源类型</typeparam>
+        /// <returns>资源</returns>
+        public void LoadResourceAsync<T>(string path, System.Action<UnityEngine.Object> loadFinish) where T : UnityEngine.Object
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                loadFinish?.Invoke(null);
+            }
+            uint crc = Crc32.GetCrc32(path);
+            //从缓存中获取BundleItem
+            BundleItem bundleItem = GeCacheItemFormAssetDic(crc);
+            
+            //如果BundleItem中的对象已经加载过，就直接返回对象
+            if(bundleItem.obj != null)
+            {
+                loadFinish?.Invoke(bundleItem.obj as T);
+            }
+            
+            //声明新对象
+            T obj = null;
+#if UNITY_EDITOR
+            if(BundleSettings.Instance.loadAssetType == LoadAssetEnum.Editor)
+            {
+                obj = LoadAssetsFormEditor<T>(path);
+                loadFinish?.Invoke(obj);
+            }
+#endif
+            if (obj == null)
+            {
+                //加载该路径对应的AssetBundle
+                bundleItem = AssetBundleManager.Instance.LoadAssetBundle(crc);
+                if (bundleItem != null)
+                {
+                    if(bundleItem.obj != null)
+                    {
+                        loadFinish?.Invoke(bundleItem.obj as T);
+                        bundleItem.path = path;
+                        bundleItem.crc = crc;
+                        _alReadyAssetDic.Add(crc, bundleItem);
+                    }
+                    else
+                    {
+                        //通过异步方式加载AssetBundle
+                        AssetBundleRequest bundleRequest = bundleItem.assetBundle.LoadAssetAsync<T>(bundleItem.assetName);
+                        bundleRequest.completed += (asyncOperation) =>
+                        {
+                            UnityEngine.Object loadObj = (asyncOperation as AssetBundleRequest).asset;
+                            bundleItem.obj = loadObj;
+                            bundleItem.path = path;
+                            bundleItem.crc = crc;
+                            if (!_alReadyAssetDic.ContainsKey(crc))
+                            {
+                                _alReadyAssetDic.Add(crc, bundleItem);
+                            }
+                            loadFinish?.Invoke(loadObj);
+                        };
+                    }
+                }
+                else
+                {
+                    Debug.LogError("item is null... Path:" + path);
+                    loadFinish?.Invoke(null);
+                }
+            }
+            else
+            {
+                bundleItem.obj = obj;
+                bundleItem.path = path;
+                //将对象添加到缓存中
+                _alReadyAssetDic.Add(crc, bundleItem);
+            }
+        }
         
         /// <summary>
         /// 从缓存中获取BundleItem
@@ -96,5 +174,7 @@ namespace ZMAssetFrameWork
             return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(path);
         }
 #endif
+
+        #endregion
     }
 }
