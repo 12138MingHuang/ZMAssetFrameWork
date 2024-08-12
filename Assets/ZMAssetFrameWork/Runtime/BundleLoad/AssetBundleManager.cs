@@ -75,7 +75,7 @@ namespace ZMAssetFrameWork
             referenceCount = 0;
         }
     }
-    
+
     public class AssetBundleManager : Singleton<AssetBundleManager>
     {
         /// <summary>
@@ -92,7 +92,7 @@ namespace ZMAssetFrameWork
         /// AssetBundle缓存类对象池
         /// </summary>
         private ClassObjectPool<AssetBundleCache> _bundleCachePool = new ClassObjectPool<AssetBundleCache>(200);
-        
+
         /// <summary>
         /// AssetBundle配置文件加载路径
         /// </summary>
@@ -102,7 +102,7 @@ namespace ZMAssetFrameWork
         /// AssetBundle配置文件名称
         /// </summary>
         private string _bundleConfigName;
-        
+
         /// <summary>
         ///  AssetBundle配置文件名称
         /// </summary>
@@ -122,7 +122,7 @@ namespace ZMAssetFrameWork
             _bundleConfigPath = BundleSettings.Instance.GetHotAssetsPath(bundleModuleEnum) + _bundleConfigName;
             //如果配置文件存在，return true 如果不存在就直接从内嵌解压的资源中去加载
             //如果内嵌解压的文件不存在，说明网络有问题
-            if(!File.Exists(_bundleConfigPath))
+            if (!File.Exists(_bundleConfigPath))
             {
                 _bundleConfigPath = BundleSettings.Instance.GetAssetsDecompressPath(bundleModuleEnum) + _bundleConfigName;
                 if (!File.Exists(_bundleConfigPath))
@@ -202,7 +202,7 @@ namespace ZMAssetFrameWork
                     //需要加载这个AssetBundle依赖的其他AssetBundle
                     foreach (string bundleName in bundleItem.bundleDependenceList)
                     {
-                        if(bundleItem.bundleName != bundleName)
+                        if (bundleItem.bundleName != bundleName)
                         {
                             LoadAssetBundle(bundleItem.path, bundleItem.bundleModuleType);
                         }
@@ -285,10 +285,10 @@ namespace ZMAssetFrameWork
                 //         }
                 //     }
                 // }
-                
+
                 //通过是否是热更路径 计算出AssetBundle加载路径
                 string bundlePath = isHotPath ? hotFilePath : BundleSettings.Instance.GetAssetsDecompressPath(bundleModuleEnum) + bundleName;
-                
+
                 //判断AssetBundle是否加密，如果加密，则解密
                 if (BundleSettings.Instance.bundleEncrypt.isEncrypt)
                 {
@@ -300,13 +300,13 @@ namespace ZMAssetFrameWork
                     //通过LoadFromFile方法加载AssetBundle
                     bundleCache.assetBundle = AssetBundle.LoadFromFile(bundlePath);
                 }
-                
-                if(bundleCache.assetBundle == null)
+
+                if (bundleCache.assetBundle == null)
                 {
                     Debug.LogError("AssetBundleManager:LoadAssetBundle:加载AssetBundle失败，路径：" + bundlePath);
                     return null;
                 }
-                
+
                 //AssetBundle引用计数增加
                 bundleCache.referenceCount++;
                 _allAlreadyLoadBundleDic.Add(bundleName, bundleCache);
@@ -318,5 +318,82 @@ namespace ZMAssetFrameWork
             }
             return bundleCache.assetBundle;
         }
-    }   
+
+        /// <summary>
+        /// 释放AssetBundle，并且释放AssetBundle占用的内存资源
+        /// </summary>
+        /// <param name="assetItem">assetItem资源</param>
+        /// <param name="unLoad">是否释放内存资源</param>
+        public void ReleaseAssets(BundleItem assetItem, bool unLoad)
+        {
+            //assetBundle释放策略一般有两种
+            //1.第一种
+            // 以AssetBundle.UnLoad(false)为主
+            // 对于非对象资源，比如Text字体，Texture Audio等等，资源加载完成后，就可以直接通过AssetBundleUnLoad(false)释放AssetBundle的镜像文件
+            // 对于对象资源 比如GameObject，Prefab，Mesh等等，需要再上层做一个引用计数的对象池，Obj在加载出来之后就可以使用AssetBundle.UnLoad(false)释放AssetBundle的镜像文件
+            // 因为后续访问的对象都是对象池的物体了
+
+            //2.第二种
+            // 以AssetBundle.UnLoad(true)为主
+            // 在加载AssetBundle时候做一个缓存，后续加载的所有的资源对象全部通过缓存的AssetBundle进行加载
+            // 跳转场景的时候，直接通过AssetBundle.UnLoad(true)释放AssetBundle的镜像文件
+
+            if (assetItem != null)
+            {
+                if (assetItem.obj != null)
+                {
+                    assetItem.obj = null;
+                }
+
+                ReleaseAssetBundle(assetItem, unLoad);
+
+                foreach (string bundleName in assetItem.bundleDependenceList)
+                {
+                    //根据内存引用计数释放AssetBundle
+                    ReleaseAssetBundle(null, unLoad, bundleName);
+                }
+            }
+            else
+            {
+                Debug.LogError("assetItem is null, release asset failed");
+            }
+        }
+
+        /// <summary>
+        /// 释放AssetBundle所占用的内存资源
+        /// </summary>
+        /// <param name="assetItem">资源</param>
+        /// <param name="unLoad">是否卸载内存资源</param>
+        /// <param name="bundleName">bundleName名称</param>
+        public void ReleaseAssetBundle(BundleItem assetItem, bool unLoad, string bundleName = "")
+        {
+            string assetBundleName = "";
+            if (assetItem == null)
+            {
+                assetBundleName = bundleName;
+            }
+            else
+            {
+                assetBundleName = assetItem.bundleName;
+            }
+            AssetBundleCache bundleCacheItem = null;
+            //如果该AssetBundle的名字不为空，这个AssetBundle已经加载过来
+            if (!string.IsNullOrEmpty(assetBundleName) && _allAlreadyLoadBundleDic.TryGetValue(assetBundleName, out bundleCacheItem))
+            {
+                if (bundleCacheItem.assetBundle != null)
+                {
+                    bundleCacheItem.referenceCount--;
+                    //如果该AssetBundle的引用计数为小于等于0，则卸载AssetBundle
+                    if (bundleCacheItem.referenceCount <= 0)
+                    {
+                        bundleCacheItem.assetBundle.Unload(unLoad);
+                        _allAlreadyLoadBundleDic.Remove(assetBundleName);
+                        //回收BundleCacheItem类对象
+                        bundleCacheItem.Release();
+                        _bundleCachePool.Recycle(bundleCacheItem);
+                    }
+                }
+            }
+        }
+    }
 }
