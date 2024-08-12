@@ -24,7 +24,7 @@ namespace ZMAssetFrameWork
         /// <summary>
         /// 所有热更的资源列表
         /// </summary>
-        private List<HotFileInfo> _allDownLoadAssetsList = new List<HotFileInfo>();
+        private List<HotFileInfo> _allHotAssetsList = new List<HotFileInfo>();
         
         /// <summary>
         /// 需要下载的资源列表
@@ -93,6 +93,14 @@ namespace ZMAssetFrameWork
         /// 下载AssetBundle完成的回调
         /// </summary>
         public Action<string> OnDownLoadAssetBundleListener;
+
+        /// <summary>
+        /// 所有热更资源的一个长度
+        /// </summary>
+        public int HotAssetCount
+        {
+            get { return _allHotAssetsList.Count; }
+        }
 
         /// <summary>
         /// Mono脚本
@@ -221,7 +229,7 @@ namespace ZMAssetFrameWork
             {
                 //获取本地AssetBundle文件路径
                 string localFilePath = HotAssetsSavePath + item.abName;
-                _allDownLoadAssetsList.Add(item);
+                _allHotAssetsList.Add(item);
                 //如果本地文件不存在，或者本地文件与服务端不一致，就需要热更
                 if (!File.Exists(localFilePath) || item.md5 != MD5.GetMd5FromFile(localFilePath))
                 {
@@ -363,6 +371,23 @@ namespace ZMAssetFrameWork
             {
                 _assetsDownLoader.MAX_THREAD_COUNT = threadCount;
             }
+        }
+        
+        /// <summary>
+        /// 判断热更文件是否存在
+        /// </summary>
+        /// <param name="bundleName">热更文件</param>
+        /// <returns>是否存在</returns>
+        public bool HotAssetsIsExists(string bundleName)
+        {
+            foreach (HotFileInfo item in _allHotAssetsList)
+            {
+                if(string.Equals(bundleName, item.abName))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

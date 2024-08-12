@@ -50,6 +50,31 @@ namespace ZMAssetFrameWork
         /// </summary>
         public UnityEngine.Object obj;
     }
+
+    /// <summary>
+    /// AssetBundle缓存
+    /// </summary>
+    public class AssetBundleCache
+    {
+        /// <summary>
+        /// AssetBundle对象
+        /// </summary>
+        public AssetBundle assetBundle;
+
+        /// <summary>
+        /// AssetBundle引用计数
+        /// </summary>
+        public int referenceCount;
+
+        /// <summary>
+        /// 释放AssetBundle
+        /// </summary>
+        public void Release()
+        {
+            assetBundle = null;
+            referenceCount = 0;
+        }
+    }
     
     public class AssetBundleManager : Singleton<AssetBundleManager>
     {
@@ -58,6 +83,16 @@ namespace ZMAssetFrameWork
         /// </summary>
         private Dictionary<uint, BundleItem> _allBundleAssetDic = new Dictionary<uint, BundleItem>();
 
+        /// <summary>
+        /// 所有模块的已经加载过的AssetBundle的资源对象字典
+        /// </summary>
+        private Dictionary<string, AssetBundleCache> _allAlreadyLoadBundleDic = new Dictionary<string, AssetBundleCache>();
+
+        /// <summary>
+        /// AssetBundle缓存类对象池
+        /// </summary>
+        private ClassObjectPool<AssetBundleCache> _bundleCachePool = new ClassObjectPool<AssetBundleCache>(200);
+        
         /// <summary>
         /// AssetBundle配置文件加载路径
         /// </summary>
@@ -144,6 +179,144 @@ namespace ZMAssetFrameWork
                 Debug.LogError("AssetBundleManager:LoadAssetBundleConfig:加载配置文件失败" + e);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// 通过资源路径的Crc加载该资源所在的AssetBundle
+        /// </summary>
+        /// <param name="crc">源路径的Crc</param>
+        /// <returns>资源所在的AssetBundle</returns>
+        public BundleItem LoadAssetBundle(uint crc)
+        {
+            BundleItem bundleItem = null;
+            //先到所有的AssetBundle资源字典中查询一下这个资源存不存在，如果存在说明该资源已经打成了AssetBundle，这种情况下就可以直接加载资源了
+            //如果不存在，说明该资源没有打成AssetBundle，给与错误提示
+            _allBundleAssetDic.TryGetValue(crc, out bundleItem);
+
+            if (bundleItem != null)
+            {
+                //如果AssetBundle为空，索命该资源所在的AssetBundle没有加载进内存，这种情况就需要加载该AssetBundle
+                if (bundleItem.assetBundle == null)
+                {
+                    bundleItem.assetBundle = LoadAssetBundle(bundleItem.path, bundleItem.bundleModuleType);
+                    //需要加载这个AssetBundle依赖的其他AssetBundle
+                    foreach (string bundleName in bundleItem.bundleDependenceList)
+                    {
+                        if(bundleItem.bundleName != bundleName)
+                        {
+                            LoadAssetBundle(bundleItem.path, bundleItem.bundleModuleType);
+                        }
+                    }
+                    return bundleItem;
+                }
+                else
+                {
+                    return bundleItem;
+                }
+            }
+            else
+            {
+                Debug.LogError("Assets not exist AssetBundleConfig, LoadAssetBundle failed CRC:" + crc);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 通过AssetBundle Name加载AssetBundle
+        /// </summary>
+        /// <param name="bundleName">AssetBundle Name</param>
+        /// <param name="bundleModuleEnum">资源类型</param>
+        /// <returns>AssetBundle</returns>
+        public AssetBundle LoadAssetBundle(string bundleName, BundleModuleEnum bundleModuleEnum)
+        {
+            AssetBundleCache bundleCache = null;
+            _allAlreadyLoadBundleDic.TryGetValue(bundleName, out bundleCache);
+
+            if (bundleCache == null || (bundleCache != null && bundleCache.assetBundle == null))
+            {
+                //从类对象池中取出一个AssetBundleCahce对象
+                bundleCache = _bundleCachePool.Spawn();
+                //计算出AssetBundle的加载路径
+                string hotFilePath = BundleSettings.Instance.GetHotAssetsPath(bundleModuleEnum) + bundleName;
+                //获取热更模块
+                HotAssetsModule hotAssetsModule = ZMAssetsFrame.GetHotAssetsModule(bundleModuleEnum);
+                bool isHotPath = true;
+                if (hotAssetsModule == null)
+                {
+                    isHotPath = File.Exists(hotFilePath);
+                }
+                else
+                {
+                    isHotPath = hotAssetsModule.HotAssetCount == 0 ? File.Exists(hotFilePath) : hotAssetsModule.HotAssetsIsExists(bundleName);
+                }
+                // if (hotAssetsModule == null)
+                // {
+                //     if(File.Exists(hotFilePath))
+                //     {
+                //         isHotPath = true;
+                //     }
+                //     else
+                //     {
+                //         isHotPath = false;
+                //     }
+                // }
+                // else
+                // {
+                //     if (hotAssetsModule.HotAssetCount == 0)
+                //     {
+                //         if(File.Exists(hotFilePath))
+                //         {
+                //             isHotPath = true;
+                //         }
+                //         else
+                //         {
+                //             isHotPath = false;
+                //         }
+                //     }
+                //     else
+                //     {
+                //         if (hotAssetsModule.HotAssetsIsExists(bundleName))
+                //         {
+                //             isHotPath = true;
+                //         }
+                //         else
+                //         {
+                //             isHotPath = false;
+                //         }
+                //     }
+                // }
+                
+                //通过是否是热更路径 计算出AssetBundle加载路径
+                string bundlePath = isHotPath ? hotFilePath : BundleSettings.Instance.GetAssetsDecompressPath(bundleModuleEnum) + bundleName;
+                
+                //判断AssetBundle是否加密，如果加密，则解密
+                if (BundleSettings.Instance.bundleEncrypt.isEncrypt)
+                {
+                    byte[] bytes = AES.AESFileByteDecrypt(bundlePath, BundleSettings.Instance.bundleEncrypt.encryptKey);
+                    bundleCache.assetBundle = AssetBundle.LoadFromMemory(bytes);
+                }
+                else
+                {
+                    //通过LoadFromFile方法加载AssetBundle
+                    bundleCache.assetBundle = AssetBundle.LoadFromFile(bundlePath);
+                }
+                
+                if(bundleCache.assetBundle == null)
+                {
+                    Debug.LogError("AssetBundleManager:LoadAssetBundle:加载AssetBundle失败，路径：" + bundlePath);
+                    return null;
+                }
+                
+                //AssetBundle引用计数增加
+                bundleCache.referenceCount++;
+                _allAlreadyLoadBundleDic.Add(bundleName, bundleCache);
+            }
+            else
+            {
+                //AssetBundle已经加载过了
+                bundleCache.referenceCount++;
+            }
+            return bundleCache.assetBundle;
         }
     }   
 }
