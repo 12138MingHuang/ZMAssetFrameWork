@@ -115,9 +115,26 @@ namespace ZMAssetFrameWork
             HotAssetsManager.DownLoadBundleFinish += AssetsDownLoadFinish;
         }
 
+        /// <summary>
+        /// AssetBundle资源下载完成回调
+        /// </summary>
+        /// <param name="hotFileInfo">热更文件信息</param>
         private void AssetsDownLoadFinish(HotFileInfo hotFileInfo)
         {
             Debug.Log("ReourceManager AssetsDownLoadFinish: " + hotFileInfo.abName);
+            //处理比AssetBundle配置文件先下载下来的AssetBundle的加载
+            if(hotFileInfo.abName == "AssetBundleConfig")
+            {
+                Debug.Log("Handler waitLoadList Count: " + _waitLoadAssetsList.Count);
+                HotFileInfo[] hotFileArray = _waitLoadAssetsList.ToArray();
+                _waitLoadAssetsList.Clear();
+                foreach (HotFileInfo item in hotFileArray)
+                {
+                    AssetsDownLoadFinish(item);
+                }
+                return;
+            }
+            
             //如果回调字典长度大于0 才需要去处理回调
             if (_loadObjectCallBackDic.Count > 0)
             {
@@ -129,6 +146,7 @@ namespace ZMAssetFrameWork
                 {
                     for (int i = 0; i < _waitLoadAssetsList.Count; ++i)
                     {
+                        //去重
                         if(hotFileInfo.abName == _waitLoadAssetsList[i].abName)
                         {
                             return;
