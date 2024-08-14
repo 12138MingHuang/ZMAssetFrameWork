@@ -58,6 +58,11 @@ namespace ZMAssetFrameWork
         /// 等待下载的模块队列
         /// </summary>
         private Queue<WaitDownLoadModule> _waitDownLoadModuleQueue = new Queue<WaitDownLoadModule>();
+
+        /// <summary>
+        /// 下载AssetBundle完成
+        /// </summary>
+        public static Action<HotFileInfo> DownLoadBundleFinish;
         
         public void HotAssets(BundleModuleEnum bundleModuleEnum, Action<BundleModuleEnum> startHotCallBack, Action<BundleModuleEnum> hotFinish, Action<BundleModuleEnum> waiteDownLoad, bool isCheckAssetsVersion = true)
         {

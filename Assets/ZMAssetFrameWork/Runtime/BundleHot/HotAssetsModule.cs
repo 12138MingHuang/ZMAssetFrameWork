@@ -335,6 +335,7 @@ namespace ZMAssetFrameWork
             {
                 OnDownLoadAssetBundleListener?.Invoke(abName);
             }
+            HotAssetsManager.DownLoadBundleFinish?.Invoke(hotFileInfo);
         }
         
         private void DownLoadAssetBundleFailed(HotFileInfo hotFileInfo)

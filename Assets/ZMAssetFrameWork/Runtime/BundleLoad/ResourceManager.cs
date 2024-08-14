@@ -40,6 +40,18 @@ namespace ZMAssetFrameWork
             obj = null;
         }
     }
+
+    /// <summary>
+    /// 加载对象回调
+    /// </summary>
+    public class LoadObjectCallBack
+    {
+        public string path;
+        public uint crc;
+        public object param1;
+        public object param2;
+        public System.Action<GameObject, object, object> loadResult;
+    }
     
     public class ResourceManager
     {
@@ -76,7 +88,7 @@ namespace ZMAssetFrameWork
         /// <summary>
         /// 异步加载任务唯一id
         /// </summary>
-        public long asyncTaskGuid
+        private long _asyncTaskGuid
         {
             get
             {
@@ -87,7 +99,78 @@ namespace ZMAssetFrameWork
                 return _asyncGuid++;
             }
         }
+        
+        /// <summary>
+        /// 加载对象回调字典
+        /// </summary>
+        private Dictionary<long, LoadObjectCallBack> _loadObjectCallBackDic = new Dictionary<long, LoadObjectCallBack>();
+        
+        /// <summary>
+        /// 等待加载的资源列表
+        /// </summary>
+        private List<HotFileInfo> _waitLoadAssetsList = new List<HotFileInfo>();
 
+        public void Initlizate()
+        {
+            HotAssetsManager.DownLoadBundleFinish += AssetsDownLoadFinish;
+        }
+
+        private void AssetsDownLoadFinish(HotFileInfo hotFileInfo)
+        {
+            Debug.Log("ReourceManager AssetsDownLoadFinish: " + hotFileInfo.abName);
+            //如果回调字典长度大于0 才需要去处理回调
+            if (_loadObjectCallBackDic.Count > 0)
+            {
+                //根据对象的路径查找对象所在的AB包，以及这个AB包下的所有资源
+                List<BundleItem> bundleItemList = AssetBundleManager.Instance.GetBundleItemByABName(hotFileInfo.abName);
+                //如果bundleItemList.Count==0则说明配置文件未加载，资源下载是多线程下的
+                //有可能会出现AssetBundle下载的速度比AssetBundleConfig配置文件快，这种情况下AB配置文件就处于未加载状态
+                if (bundleItemList.Count == 0)
+                {
+                    for (int i = 0; i < _waitLoadAssetsList.Count; ++i)
+                    {
+                        if(hotFileInfo.abName == _waitLoadAssetsList[i].abName)
+                        {
+                            return;
+                        }
+                    }
+                    _waitLoadAssetsList.Add(hotFileInfo);
+                    return;
+                }
+                
+                List<long> removeLst = new List<long>();
+                //遍历对象回调，触发资源加载
+                foreach (var item in _loadObjectCallBackDic)
+                {
+                    if(ListContainsAsset(bundleItemList, item.Value.crc))
+                    {
+                        Debug.Log("ReourceManager AssetsDownLoadFinish Load Obj path: " + item.Value.path);
+                        item.Value.loadResult?.Invoke(Instantiate(item.Value.path, null, Vector3.zero, Vector3.one, Quaternion.identity), 
+                            item.Value.param1, item.Value.param2);
+                        
+                        removeLst.Add(item.Key);
+                    }
+                }
+                //移除字典中的回调
+                for (int i = 0; i < removeLst.Count; i++)
+                {
+                    _loadObjectCallBackDic.Remove(removeLst[i]);
+                }
+            }
+        }
+
+        private bool ListContainsAsset(List<BundleItem> bundleItemList, uint crc)
+        {
+            foreach (BundleItem item in bundleItemList)
+            {
+                if (item.crc == crc)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
         /// <summary>
         /// 同步克隆物体
         /// </summary>
@@ -185,7 +268,7 @@ namespace ZMAssetFrameWork
                 return;
             }
             //获取异步加载任务唯一id
-            long guid = asyncTaskGuid;
+            long guid = _asyncTaskGuid;
             _asyncLoadingTaskList.Add(guid);
             //开始异步加载资源
             LoadResourceAsync<GameObject>(path, (obj) =>
@@ -206,6 +289,40 @@ namespace ZMAssetFrameWork
                 }
             });
         }
+
+        public long InstantiateAndLoad(string path, System.Action<GameObject, object, object> loadAsync, System.Action loading, object param1 = null, object param2 = null)
+        {
+            path = path.EndsWith(".prefab") ? path : (path + ".prefab");
+            //先从对象池中查询这个对象，如果存在就直接使用
+            GameObject cacheObj = GetCacheObjFormPools(Crc32.GetCrc32(path));
+            long loadId = -1;
+            if(cacheObj != null)
+            {
+                loadAsync?.Invoke(null, cacheObj, null);
+            }
+            GameObject obj = Instantiate(path, null, Vector3.zero, Vector3.one, Quaternion.identity);
+            
+            if(obj != null)
+            {
+                loadAsync?.Invoke(null, param1, param2);
+            }
+            else
+            {
+                //资源没有下载完成，本地没有这个资源
+                loadId = _asyncTaskGuid;
+                loading?.Invoke();
+                _loadObjectCallBackDic.Add(loadId, new LoadObjectCallBack
+                {
+                    path = path,
+                    crc = Crc32.GetCrc32(path),
+                    loadResult = loadAsync,
+                    param1 = param1,
+                    param2 = param2
+                });
+            }
+            return loadId;
+        }
+        
         #region 资源加载
         /// <summary>
         /// 同步加载资源，外部直接调用，仅仅加载不需要实例化的资源

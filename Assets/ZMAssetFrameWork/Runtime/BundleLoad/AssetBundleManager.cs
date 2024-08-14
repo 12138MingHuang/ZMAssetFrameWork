@@ -180,6 +180,24 @@ namespace ZMAssetFrameWork
                 throw;
             }
         }
+        
+        /// <summary>
+        /// 根据AssetBundle名称查询该AssetBundle中都有那些资源
+        /// </summary>
+        /// <param name="bundleName">AssetBundle名称</param>
+        /// <returns>BundleItem资源列表</returns>
+        public List<BundleItem> GetBundleItemByABName(string bundleName)
+        {
+            List<BundleItem> itemList = new List<BundleItem>();
+            foreach (var item in _allBundleAssetDic.Values)
+            {
+                if (string.Equals(item.bundleName, bundleName))
+                {
+                    itemList.Add(item);
+                }
+            }
+            return itemList;
+        }
 
         /// <summary>
         /// 通过资源路径的Crc加载该资源所在的AssetBundle
