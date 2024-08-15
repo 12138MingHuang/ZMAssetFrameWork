@@ -15,10 +15,10 @@ MonoBehaviour:
   AssetBundleConfig:
   - bundleId: 1
     moduleName: Game
-    isBuild: 0
-    lastClickBtnTime: 100235.41
+    isBuild: 1
+    lastClickBtnTime: 977.1334
     prefabPathArr:
-    - Assets/BuildBundleDemo/Prefab/Window
+    - Assets/BuildBundleDemo/Hall/Prefab
     rootFolderPathArr:
     - Assets/BuildBundleDemo/Texture
     signFolderPathArr:

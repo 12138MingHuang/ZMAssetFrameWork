@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abad4eae1429a5445a68a3927801b843, type: 3}
   m_Name: AssetBundleSettings
   m_EditorClassIdentifier: 
-  AssetBundleDownLoadURL: http://127.0.0.1
+  AssetBundleDownLoadURL: http://127.0.0.1:8080
   bundleEncrypt:
-    isEncrypt: 1
+    isEncrypt: 0
     encryptKey: zhangbin
   buildAssetBundleOptions: 256
   buildTarget: 13
   bundleHotType: 1
+  loadAssetType: 0
   MAX_THREAD_COUNT: 3

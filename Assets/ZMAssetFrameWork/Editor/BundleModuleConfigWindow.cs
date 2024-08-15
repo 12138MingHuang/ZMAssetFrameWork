@@ -143,6 +143,7 @@ public class BundleModuleConfigWindow : OdinEditorWindow
             moduleData.prefabPathArr = prefabPathArr;
             moduleData.rootFolderPathArr = rootFolderPathArr;
             moduleData.signFolderPathArr = signFolderPathArr;
+            BuildBundleConfigura.Instance.SaveModuleData(moduleData);
         }
         EditorUtility.DisplayDialog("保存成功!", "配置已经保存", "确定");
         Close();

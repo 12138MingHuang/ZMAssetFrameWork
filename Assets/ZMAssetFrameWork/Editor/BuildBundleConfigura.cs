@@ -66,7 +66,21 @@ public class BuildBundleConfigura : ScriptableObject
     /// <param name="moduleData"></param>
     public void SaveModuleData(BundleModuleData moduleData)
     {
-        AssetBundleConfig.Add(moduleData);
+        if (AssetBundleConfig.Contains(moduleData))
+        {
+            for (int i = 0; i < AssetBundleConfig.Count; i++)
+            {
+                if(AssetBundleConfig[i] == moduleData)
+                {
+                    AssetBundleConfig[i] = moduleData;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            AssetBundleConfig.Add(moduleData);
+        }
         Save();
     }
 

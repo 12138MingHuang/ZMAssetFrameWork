@@ -144,7 +144,19 @@ namespace ZMAssetFrameWork
                 //获取当前模块配置文件所在路径
                 if (GeneratorBundleConfigPath(bundleModuleEnum))
                 {
-                    AssetBundle bundleConfig = AssetBundle.LoadFromFile(_bundleConfigPath);
+                    AssetBundle bundleConfig = null;
+                    //判断AssetBundle是否加密，如果加密，则解密
+                    if (BundleSettings.Instance.bundleEncrypt.isEncrypt)
+                    {
+                        byte[] bytes = AES.AESFileByteDecrypt(_bundleConfigPath, BundleSettings.Instance.bundleEncrypt.encryptKey);
+                        bundleConfig = AssetBundle.LoadFromMemory(bytes);
+                    }
+                    else
+                    {
+                        //通过LoadFromFile方法加载AssetBundle
+                        bundleConfig = AssetBundle.LoadFromFile(_bundleConfigPath);
+                    }
+                    // AssetBundle bundleConfig = AssetBundle.LoadFromFile(_bundleConfigPath);
                     string bundleConfigJson = bundleConfig.LoadAsset<TextAsset>(_assetsBundleConfigName).text;
                     BundleConfig bundleManifest = JsonConvert.DeserializeObject<BundleConfig>(bundleConfigJson);
                     //把所有的AssetBundle信息存放在字典中，管理起来
@@ -216,13 +228,13 @@ namespace ZMAssetFrameWork
                 //如果AssetBundle为空，索命该资源所在的AssetBundle没有加载进内存，这种情况就需要加载该AssetBundle
                 if (bundleItem.assetBundle == null)
                 {
-                    bundleItem.assetBundle = LoadAssetBundle(bundleItem.path, bundleItem.bundleModuleType);
+                    bundleItem.assetBundle = LoadAssetBundle(bundleItem.bundleName, bundleItem.bundleModuleType);
                     //需要加载这个AssetBundle依赖的其他AssetBundle
                     foreach (string bundleName in bundleItem.bundleDependenceList)
                     {
                         if (bundleItem.bundleName != bundleName)
                         {
-                            LoadAssetBundle(bundleItem.path, bundleItem.bundleModuleType);
+                            LoadAssetBundle(bundleName, bundleItem.bundleModuleType);
                         }
                     }
                     return bundleItem;

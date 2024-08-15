@@ -144,7 +144,7 @@ namespace ZMAssetFrameWork
         public void OnHotFinishCallBack(BundleModuleEnum bundleModuleEnum)
         {
             Debug.Log("OnHotFinishCallBack.....");
-            AssetBundleManager.Instance.LoadAssetBundleConfig(bundleModuleEnum);
+            // AssetBundleManager.Instance.LoadAssetBundleConfig(bundleModuleEnum);
             _main.StartCoroutine(InitGameEnv());
         }
 
@@ -182,6 +182,7 @@ namespace ZMAssetFrameWork
                 yield return null;
             }
             _main.StartGame();
+            GameObject.Destroy(_hotAssetsWindow);
         }
         
         public void LoadGameConfig()
