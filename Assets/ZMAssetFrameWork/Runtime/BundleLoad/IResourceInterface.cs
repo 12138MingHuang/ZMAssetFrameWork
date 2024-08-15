@@ -13,13 +13,13 @@ namespace ZMAssetFrameWork
 
         void PreLoadResource<T>(string path) where T : UnityEngine.Object;
         
-        GameObject Instantiate(string path, Action<GameObject, object, object> load, object param1, object param2);
+        GameObject Instantiate(string path, Transform parent, Vector3 localPosition, Vector3 localScale, Quaternion quaternion);
         
-        void InstantiateAsync(string path, Action<GameObject, object, object> loadAsync, Action loading, object param1, object param2);
+        void InstantiateAsync(string path, System.Action<GameObject, object, object> loadAsync, object param1 = null, object param2 = null);
         
-        void InstantiateAndLoad(string path, Action<GameObject, object> loadAsync, Action loading, object param1, object param2);
+        long InstantiateAndLoad(string path, System.Action<GameObject, object, object> loadAsync, System.Action loading, object param1 = null, object param2 = null);
         
-        void RemoveObjectLoadCallBack(long lodaId);
+        void RemoveObjectLoadCallBack(long loadId);
         
         void Release(GameObject obj, bool isDestroy = false);
         
@@ -35,9 +35,9 @@ namespace ZMAssetFrameWork
         
         Sprite LoadAtlasSprite(string atlasPath, string spriteName);
         
-        void LoadTextureAysnc(string path, Action<Texture, object> loadAsync, object param = null);
+        long LoadTextureAsync(string path, Action<Texture, object> loadAsync, object param = null);
         
-        void LoadSpirteAysnc(string path, Image image, bool setNativeSize = false, Action<Sprite> loadAsync = null);
+        long LoadSpriteAsync(string path, Image image, bool setNativeSize = false, Action<Sprite> loadAsync = null);
         
         void ClearAllAsyncLoadTask();
 

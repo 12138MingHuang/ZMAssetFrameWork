@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.U2D;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -117,29 +118,50 @@ namespace ZMAssetFrameWork
         {
             HotAssetsManager.DownLoadBundleFinish += AssetsDownLoadFinish;
         }
+        
+        /// <summary>
+        /// 预加载对象
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="count">数量</param>
         public void PreLoadObj(string path, int count = 1)
         {
-            throw new NotImplementedException();
+            List<GameObject> preLoadObjList = new List<GameObject>();
+            for (int i = 0; i < count; ++i)
+            {
+                preLoadObjList.Add(Instantiate(path, null, Vector3.zero, Vector3.one, Quaternion.identity));
+            }
+            //回收对象到对象池
+            foreach (GameObject obj in preLoadObjList)
+            {
+                Release(obj);
+            }
         }
+        
+        /// <summary>
+        /// 预加载资源
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <typeparam name="T">类型</typeparam>
         public void PreLoadResource<T>(string path) where T : Object
         {
-            throw new NotImplementedException();
+            LoadResource<T>(path);
         }
-        public GameObject Instantiate(string path, Action<GameObject, object, object> load, object param1, object param2)
+        
+        /// <summary>
+        /// 移除对象加载回调
+        /// </summary>
+        /// <param name="loadId"></param>
+        public void RemoveObjectLoadCallBack(long loadId)
         {
-            throw new NotImplementedException();
-        }
-        public void InstantiateAsync(string path, Action<GameObject, object, object> loadAsync, Action loading, object param1, object param2)
-        {
-            throw new NotImplementedException();
-        }
-        public void InstantiateAndLoad(string path, Action<GameObject, object> loadAsync, Action loading, object param1, object param2)
-        {
-            throw new NotImplementedException();
-        }
-        public void RemoveObjectLoadCallBack(long lodaId)
-        {
-            throw new NotImplementedException();
+            if (loadId == -1)
+            {
+                return;
+            }
+            if(_loadObjectCallBackDic.ContainsKey(loadId))
+            {
+                _loadObjectCallBackDic.Remove(loadId);
+            }
         }
         
         /// <summary>
@@ -231,37 +253,161 @@ namespace ZMAssetFrameWork
         {
             Resources.UnloadAsset(texture);
         }
+        
+        /// <summary>
+        /// 加载图片资源
+        /// </summary>
+        /// <param name="path">Sprite图片路径</param>
+        /// <returns>Sprite</returns>
         public Sprite LoadSprite(string path)
         {
-            throw new NotImplementedException();
+            if(!path.EndsWith(".png")) path += ".png";
+            return Resources.Load<Sprite>(path);
         }
+        
+        /// <summary>
+        /// 加载Texture图片资源
+        /// </summary>
+        /// <param name="path">Texture图片路径</param>
+        /// <returns>Texture</returns>
         public Texture LoadTexture(string path)
         {
-            throw new NotImplementedException();
+            if(!path.EndsWith(".jpg")) path += ".jpg";
+            return Resources.Load<Texture>(path);
         }
+        
+        /// <summary>
+        /// 加载音频资源
+        /// </summary>
+        /// <param name="path">音频路径</param>
+        /// <returns>音频资源</returns>
         public AudioClip LoadAudio(string path)
         {
-            throw new NotImplementedException();
+            return LoadResource<AudioClip>(path);
         }
+        
+        /// <summary>
+        /// 加载Text文本资源
+        /// </summary>
+        /// <param name="path">Text文本路径</param>
+        /// <returns>Text文本</returns>
         public TextAsset LoadTextAsset(string path)
         {
-            throw new NotImplementedException();
+            return LoadResource<TextAsset>(path);
         }
+        
+        /// <summary>
+        /// 从图集中加载指定名称的图片
+        /// </summary>
+        /// <param name="atlasPath">图集路径</param>
+        /// <param name="spriteName">图片名称</param>
+        /// <returns>图片</returns>
         public Sprite LoadAtlasSprite(string atlasPath, string spriteName)
         {
-            throw new NotImplementedException();
+            if (!atlasPath.EndsWith(".spriteatlas")) atlasPath += ".spriteatlas";
+            return LoadSpriteFormAtlas(LoadResource<SpriteAtlas>(atlasPath), spriteName);
         }
-        public void LoadTextureAysnc(string path, Action<Texture, object> loadAsync, object param = null)
+        
+        /// <summary>
+        /// 从图集中加载指定名称的图片
+        /// </summary>
+        /// <param name="spriteAtlas">图集</param>
+        /// <param name="spriteName">指定图片名称</param>
+        /// <returns>图片</returns>
+        private Sprite LoadSpriteFormAtlas(SpriteAtlas spriteAtlas, string spriteName)
         {
-            throw new NotImplementedException();
+            if (spriteAtlas == null)
+            {
+                Debug.LogError("Not find spriteAtlas Name:" + spriteName);
+                return null;
+            }
+            //从图集中获取指定名称的图片
+            Sprite sprite = spriteAtlas.GetSprite(spriteName);
+            if (sprite != null)
+            {
+                return sprite;
+            }
+            Debug.LogError("Not find sprite Name:" + spriteName);
+            return null;
         }
-        public void LoadSpirteAysnc(string path, Image image, bool setNativeSize = false, Action<Sprite> loadAsync = null)
+        
+        /// <summary>
+        /// 异步加载Texture图片资源
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="loadAsync">异步加载回调</param>
+        /// <param name="param">可选参数</param>
+        /// <returns>Texture图片</returns>
+        public long LoadTextureAsync(string path, Action<Texture, object> loadAsync, object param = null)
         {
-            throw new NotImplementedException();
+            if (!path.EndsWith(".jpg")) path += ".jpg";
+
+            long guid = _asyncTaskGuid;
+            _asyncLoadingTaskList.Add(guid);
+            LoadResourceAsync<Texture>(path, (texture) =>
+            {
+                if (loadAsync != null)
+                {
+                    if (_asyncLoadingTaskList.Contains(guid))
+                    {
+                        _asyncLoadingTaskList.Remove(guid);
+                        loadAsync?.Invoke(texture as Texture, param);
+                    }
+                }
+                else
+                {
+                    _asyncLoadingTaskList.Remove(guid);
+                    Debug.LogError("Async Load texture is null, Path:" + path);
+                }
+            });
+            return guid;
         }
+        
+        /// <summary>
+        /// 异步加载Sprite图片资源
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="image">Image组件</param>
+        /// <param name="setNativeSize">是否设置为美术图的原始尺寸</param>
+        /// <param name="loadAsync">加载完成回调</param>
+        /// <returns>Sprite图片</returns>
+        public long LoadSpriteAsync(string path, Image image, bool setNativeSize = false, Action<Sprite> loadAsync = null)
+        {
+            if (!path.EndsWith(".png")) path += ".png";
+            
+            long guid = _asyncTaskGuid;
+            _asyncLoadingTaskList.Add(guid);
+            LoadResourceAsync<Sprite>(path, (obj) =>
+            {
+                if (obj != null)
+                {
+                    if (_asyncLoadingTaskList.Contains(guid))
+                    {
+                        Sprite sprite = obj as Sprite;
+                        if(image != null)
+                        {
+                            image.sprite = sprite;
+                            if (setNativeSize) image.SetNativeSize();
+                        }
+                        _asyncLoadingTaskList.Remove(guid);
+                        loadAsync?.Invoke(sprite);
+                    }
+                }
+                else
+                {
+                    _asyncLoadingTaskList.Remove(guid);
+                    Debug.LogError("Async Load sprite is null, Path:" + path);
+                }
+            });
+            return guid;
+        }
+        
+        /// <summary>
+        /// 清理所有异步加载任务
+        /// </summary>
         public void ClearAllAsyncLoadTask()
         {
-            throw new NotImplementedException();
+            _asyncLoadingTaskList.Clear();
         }
         
         /// <summary>
