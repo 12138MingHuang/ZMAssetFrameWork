@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace ZMAssetFrameWork
 {
     public class HotUpdateManager : Singleton<HotUpdateManager>
     {
+        private Main _main;
+        
         /// <summary>
         /// 热更窗口
         /// </summary>
@@ -13,8 +16,13 @@ namespace ZMAssetFrameWork
         /// 热更且解压游戏内嵌资源
         /// </summary>
         /// <param name="bundleModuleEnum">热更资源类型</param>
-        public void HotAndUnPackAssets(BundleModuleEnum bundleModuleEnum)
+        public void HotAndUnPackAssets(BundleModuleEnum bundleModuleEnum, Main main)
         {
+            if (this._main == null)
+            {
+                this._main = main;
+            }
+            
             _hotAssetsWindow = InstantiateResourcesObj<HotAssetsWindow>("HotAssetsWindow");
             
             //开始解压游戏内嵌资源
@@ -137,6 +145,48 @@ namespace ZMAssetFrameWork
         {
             Debug.Log("OnHotFinishCallBack.....");
             AssetBundleManager.Instance.LoadAssetBundleConfig(bundleModuleEnum);
+            _main.StartCoroutine(InitGameEnv());
+        }
+
+        /// <summary>
+        /// 初始化游戏环境
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator InitGameEnv()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                _hotAssetsWindow.progressSlider.value = i / 100.0f;
+                if (i == 1)
+                {
+                    _hotAssetsWindow.progressText.text = "加载本地环境...";
+                }
+                else if (i == 20)
+                {
+                    _hotAssetsWindow.progressText.text = "加载配置文件...";
+                }
+                else if (i == 70)
+                {
+                    _hotAssetsWindow.progressText.text = "加载AssetBundle配置文件...";
+                    AssetBundleManager.Instance.LoadAssetBundleConfig(BundleModuleEnum.Game);
+                }
+                else if (i == 90)
+                {
+                    _hotAssetsWindow.progressText.text = "加载游戏配置文件...";
+                    LoadGameConfig();
+                }
+                else if (i == 99)
+                {
+                    _hotAssetsWindow.progressText.text = "加载地图场景...";
+                }
+                yield return null;
+            }
+            _main.StartGame();
+        }
+        
+        public void LoadGameConfig()
+        {
+
         }
     }
 }
