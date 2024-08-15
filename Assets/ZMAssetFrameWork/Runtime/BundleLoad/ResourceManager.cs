@@ -263,9 +263,65 @@ namespace ZMAssetFrameWork
         {
             throw new NotImplementedException();
         }
+        
+        /// <summary>
+        /// 清理加载的资源，释放内存
+        /// </summary>
+        /// <param name="abSoluteCleaning">深度清理: true: 销毁所有由AssetBundle加载和生成的对象，彻底释放内存占用
+        /// 深度清理: false: 销毁对象池中的对象，但不销毁由AssetBundle克隆出并在使用的对象，具体内存释放根据内存引用计数选择性释放</param>
         public void ClearResourcesAssets(bool abSoluteCleaning)
         {
-            throw new NotImplementedException();
+            if (abSoluteCleaning)
+            {
+                foreach (var item in _allObjectDic)
+                {
+                    if (item.Value.obj != null)
+                    {
+                        //销毁GameObject对象，回收缓存类对象，等待下次复用
+                        GameObject.Destroy(item.Value.obj);
+                        item.Value.Release();
+                        _cacheObjectPool.Recycle(item.Value);
+                    }
+                }
+                //清理列表
+                _allObjectDic.Clear();
+                _objectPoolDic.Clear();
+                ClearAllAsyncLoadTask();
+            }
+            else
+            {
+                foreach (List<CacheObject> objList in _objectPoolDic.Values)
+                {
+                    if (objList != null)
+                    {
+                        foreach (CacheObject cacheObject in objList)
+                        {
+                            if(cacheObject.obj != null)
+                            {
+                                //销毁GameObject对象，回收缓存类对象，等待下次复用
+                                GameObject.Destroy(cacheObject.obj);
+                                cacheObject.Release();
+                                _cacheObjectPool.Recycle(cacheObject);
+                            }
+                        }
+                    }
+                }
+                _objectPoolDic.Clear();
+            }
+            
+            //释放AssetBundle以及里面的资源所占用的内存
+            foreach (var item in _alReadyAssetDic)
+            {
+                AssetBundleManager.Instance.ReleaseAssets(item.Value, abSoluteCleaning);
+            }
+            
+            //清理列表
+            _loadObjectCallBackDic.Clear();
+            _alReadyAssetDic.Clear();
+            //释放未使用的资源(未使用的资源值得是 没有被引用的资源)
+            Resources.UnloadUnusedAssets();
+            //触发GC垃圾回收
+            System.GC.Collect();
         }
 
         #region 对象加载
