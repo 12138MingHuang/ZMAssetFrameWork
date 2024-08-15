@@ -665,6 +665,15 @@ namespace ZMAssetFrameWork
             });
         }
 
+        /// <summary>
+        /// 克隆并且等待资源下载完成克隆
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="loadAsync">异步加载回调</param>
+        /// <param name="loading">加载中回调</param>
+        /// <param name="param1">异步加载参数1</param>
+        /// <param name="param2">异步加载参数2</param>
+        /// <returns>资源id</returns>
         public long InstantiateAndLoad(string path, System.Action<GameObject, object, object> loadAsync, System.Action loading, object param1 = null, object param2 = null)
         {
             path = path.EndsWith(".prefab") ? path : (path + ".prefab");

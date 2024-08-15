@@ -17,6 +17,8 @@ namespace ZMAssetFrameWork
         
         private IDecompressAssets _decompressAssets = null;
 
+        private IResourceInterface _resource = null;
+
         /// <summary>
         /// 初始化框架
         /// </summary>
@@ -27,6 +29,7 @@ namespace ZMAssetFrameWork
             DontDestroyOnLoad(recycleObjectRoot);
             _hotAssets = new HotAssetsManager();
             _decompressAssets = new AssetsDecompressManager();
+            _resource = new ResourceManager();
         }
 
         public void Update()
