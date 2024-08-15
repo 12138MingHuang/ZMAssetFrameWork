@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace ZMAssetFrameWork
 {
@@ -53,7 +56,7 @@ namespace ZMAssetFrameWork
         public System.Action<GameObject, object, object> loadResult;
     }
     
-    public class ResourceManager
+    public class ResourceManager : IResourceInterface
     {
         /// <summary>
         /// 已经加载的资源 key 未资源路径crc value为资源对象
@@ -114,7 +117,159 @@ namespace ZMAssetFrameWork
         {
             HotAssetsManager.DownLoadBundleFinish += AssetsDownLoadFinish;
         }
+        public void PreLoadObj(string path, int count = 1)
+        {
+            throw new NotImplementedException();
+        }
+        public void PreLoadResource<T>(string path) where T : Object
+        {
+            throw new NotImplementedException();
+        }
+        public GameObject Instantiate(string path, Action<GameObject, object, object> load, object param1, object param2)
+        {
+            throw new NotImplementedException();
+        }
+        public void InstantiateAsync(string path, Action<GameObject, object, object> loadAsync, Action loading, object param1, object param2)
+        {
+            throw new NotImplementedException();
+        }
+        public void InstantiateAndLoad(string path, Action<GameObject, object> loadAsync, Action loading, object param1, object param2)
+        {
+            throw new NotImplementedException();
+        }
+        public void RemoveObjectLoadCallBack(long lodaId)
+        {
+            throw new NotImplementedException();
+        }
+        
+        /// <summary>
+        /// 释放对象占用内存
+        /// </summary>
+        /// <param name="obj">对象</param>
+        /// <param name="isDestroy">是否销毁</param>
+        public void Release(GameObject obj, bool isDestroy = false)
+        {
+            CacheObject cacheObject = null;
+            int insId = obj.GetInstanceID();
+            _allObjectDic.TryGetValue(insId, out cacheObject);
+            //通过GameObject.Instantiate创建的对象 不支持回收，因为对象池中没有记录
+            if (cacheObject == null)
+            {
+                Debug.LogError("Recycle obj failed,obj is GameObject.Instantiate create");
+                return;
+            }
 
+            if (isDestroy)
+            {
+                GameObject.Destroy(obj);
+                if(_allObjectDic.ContainsKey(insId))
+                {
+                    _allObjectDic.Remove(insId);
+                }
+                //获取该物体所在的对象池
+                List<CacheObject> objectPoolList = null;
+                _objectPoolDic.TryGetValue(cacheObject.crc, out objectPoolList);
+                if (objectPoolList != null)
+                {
+                    //从对象池中移除缓存对象
+                    if(objectPoolList.Contains(cacheObject))
+                    {
+                        objectPoolList.Remove(cacheObject);
+                    }
+                    cacheObject.Release();
+                    _cacheObjectPool.Recycle(cacheObject);
+                }
+                //如果该对象不在对象池，或者已经全部释放了，就卸载该对象AssetBundle的资源占用
+                if(objectPoolList == null || objectPoolList.Count == 0)
+                {
+                    BundleItem bundleItem = null;
+                    if (_alReadyAssetDic.TryGetValue(cacheObject.crc, out bundleItem))
+                    {
+                        AssetBundleManager.Instance.ReleaseAssets(bundleItem, true);
+                    }
+                    else
+                    {
+                        Debug.LogError("_alreadyLoadAssetsDic not find BundleItem Path: " + cacheObject.path);
+                    }
+                }
+            }
+            else
+            {
+                //回收到对象池
+                List<CacheObject> objectList = null;
+                _objectPoolDic.TryGetValue(cacheObject.crc, out objectList);
+                //字典中没有该对象池
+                if (objectList == null)
+                {
+                    //创建对象池
+                    objectList = new List<CacheObject>();
+                    objectList.Add(cacheObject);
+                    _objectPoolDic.Add(cacheObject.crc, objectList);
+                }
+                else
+                {
+                    //回收到对象池
+                    objectList.Add(cacheObject);
+                }
+                //回收到对象会节点下
+                if(cacheObject.obj != null)
+                {
+                    cacheObject.obj.transform.SetParent(ZMAssetsFrame.RecycleObjRoot);
+                }
+                else
+                {
+                    Debug.LogError("cacheObject.obj is null,Release failed");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 释放图片所占用的内存
+        /// </summary>
+        /// <param name="texture">图片</param>
+        public void Release(Texture texture)
+        {
+            Resources.UnloadAsset(texture);
+        }
+        public Sprite LoadSprite(string path)
+        {
+            throw new NotImplementedException();
+        }
+        public Texture LoadTexture(string path)
+        {
+            throw new NotImplementedException();
+        }
+        public AudioClip LoadAudio(string path)
+        {
+            throw new NotImplementedException();
+        }
+        public TextAsset LoadTextAsset(string path)
+        {
+            throw new NotImplementedException();
+        }
+        public Sprite LoadAtlasSprite(string atlasPath, string spriteName)
+        {
+            throw new NotImplementedException();
+        }
+        public void LoadTextureAysnc(string path, Action<Texture, object> loadAsync, object param = null)
+        {
+            throw new NotImplementedException();
+        }
+        public void LoadSpirteAysnc(string path, Image image, bool setNativeSize = false, Action<Sprite> loadAsync = null)
+        {
+            throw new NotImplementedException();
+        }
+        public void ClearAllAsyncLoadTask()
+        {
+            throw new NotImplementedException();
+        }
+        public void ClearResourcesAssets(bool abSoluteCleaning)
+        {
+            throw new NotImplementedException();
+        }
+
+        #region 对象加载
+        
         /// <summary>
         /// AssetBundle资源下载完成回调
         /// </summary>
@@ -340,6 +495,8 @@ namespace ZMAssetFrameWork
             }
             return loadId;
         }
+        
+        #endregion
         
         #region 资源加载
         /// <summary>
