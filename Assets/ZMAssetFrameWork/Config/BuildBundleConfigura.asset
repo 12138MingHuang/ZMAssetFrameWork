@@ -13,14 +13,66 @@ MonoBehaviour:
   m_Name: BuildBundleConfigura
   m_EditorClassIdentifier: 
   AssetBundleConfig:
-  - bundleId: 1
-    moduleName: Game
-    isBuild: 1
-    lastClickBtnTime: 977.1334
+  - bundleId: 0
+    moduleName: Hall
+    isBuild: 0
+    lastClickBtnTime: 0
     prefabPathArr:
     - Assets/BuildBundleDemo/Hall/Prefab
     rootFolderPathArr:
-    - Assets/BuildBundleDemo/Texture
-    signFolderPathArr:
-    - abName: ab1
-      bundlePath: Assets/Scenes
+    - Assets/BuildBundleDemo/Hall/Textures
+    signFolderPathArr: []
+  - bundleId: 0
+    moduleName: ShuangKou
+    isBuild: 0
+    lastClickBtnTime: 0
+    prefabPathArr:
+    - Assets/BuildBundleDemo/ShuangKou/Prefab
+    rootFolderPathArr:
+    - Assets/BuildBundleDemo/ShuangKou/Textures
+    signFolderPathArr: []
+  - bundleId: 0
+    moduleName: MaJiang
+    isBuild: 0
+    lastClickBtnTime: 0
+    prefabPathArr:
+    - Assets/BuildBundleDemo/Majiang/Prefab
+    rootFolderPathArr:
+    - Assets/BuildBundleDemo/Majiang/Textures
+    signFolderPathArr: []
+  - bundleId: 0
+    moduleName: NiuNiu
+    isBuild: 0
+    lastClickBtnTime: 0
+    prefabPathArr:
+    - Assets/BuildBundleDemo/NiuNiu/Prefab
+    rootFolderPathArr:
+    - Assets/BuildBundleDemo/NiuNiu/Textures
+    signFolderPathArr: []
+  - bundleId: 0
+    moduleName: WuZhang
+    isBuild: 0
+    lastClickBtnTime: 0
+    prefabPathArr:
+    - Assets/BuildBundleDemo/WuZhang/Prefab
+    rootFolderPathArr:
+    - Assets/BuildBundleDemo/WuZhang/Textures
+    signFolderPathArr: []
+  - bundleId: 0
+    moduleName: ShiSanShui
+    isBuild: 0
+    lastClickBtnTime: 0
+    prefabPathArr:
+    - Assets/BuildBundleDemo/ShiSanShui/Prefab
+    rootFolderPathArr:
+    - Assets/BuildBundleDemo/ShiSanShui/Textures
+    signFolderPathArr: []
+  - bundleId: 0
+    moduleName: ZhiZun
+    isBuild: 0
+    lastClickBtnTime: 0
+    prefabPathArr:
+    - Assets/BuildBundleDemo/ZhiZun/Prefab
+    rootFolderPathArr:
+    - Assets/BuildBundleDemo/ZhiZun/Textures
+    signFolderPathArr: []
