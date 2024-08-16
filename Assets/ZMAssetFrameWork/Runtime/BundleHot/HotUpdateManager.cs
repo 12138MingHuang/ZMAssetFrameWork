@@ -168,7 +168,7 @@ namespace ZMAssetFrameWork
                 else if (i == 70)
                 {
                     _hotAssetsWindow.progressText.text = "加载AssetBundle配置文件...";
-                    AssetBundleManager.Instance.LoadAssetBundleConfig(BundleModuleEnum.Game);
+                    // AssetBundleManager.Instance.LoadAssetBundleConfig(BundleModuleEnum.Game);
                 }
                 else if (i == 90)
                 {
@@ -182,7 +182,7 @@ namespace ZMAssetFrameWork
                 yield return null;
             }
             _main.StartGame();
-            GameObject.Destroy(_hotAssetsWindow);
+            GameObject.Destroy(_hotAssetsWindow.gameObject);
         }
         
         public void LoadGameConfig()

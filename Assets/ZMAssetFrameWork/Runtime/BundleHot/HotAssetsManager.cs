@@ -136,7 +136,15 @@ namespace ZMAssetFrameWork
         public void CheckAssetsVersion(BundleModuleEnum bundleModuleEnum, Action<bool, float> callBack)
         {
             HotAssetsModule assetsModule = GetOrNewAssetsModule(bundleModuleEnum);
-            assetsModule.CheckAssetsVersion(callBack);
+            // assetsModule.CheckAssetsVersion(callBack);
+            assetsModule.CheckAssetsVersion((isHot, sizeM) =>
+            {
+                if(!isHot)
+                {
+                    AssetBundleManager.Instance.LoadAssetBundleConfig(bundleModuleEnum);
+                }
+                callBack?.Invoke(isHot, sizeM);
+            });
         }
         
         /// <summary>
@@ -182,6 +190,7 @@ namespace ZMAssetFrameWork
                 //就需要把闲置下来的下线线程分配给其他正在热更的模块，增加该模块的热更速度
                 MultipleThreadBalancing();
             }
+            AssetBundleManager.Instance.LoadAssetBundleConfig(bundleModuleEnum);
         }
 
         /// <summary>

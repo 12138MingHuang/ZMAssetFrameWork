@@ -15,8 +15,7 @@ public class Main : MonoBehaviour
 
     private void Start()
     {
-        // HotUpdateManager.Instance.CheckAssetsVersion(BundleModuleEnum.Game);
-        HotUpdateManager.Instance.HotAndUnPackAssets(BundleModuleEnum.Game, this);
+        HotUpdateManager.Instance.HotAndUnPackAssets(BundleModuleEnum.Hall, this);
     }
     
     public void StartGame()
