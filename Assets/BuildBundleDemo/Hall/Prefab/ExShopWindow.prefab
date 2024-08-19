@@ -782,6 +782,7 @@ GameObject:
   - component: {fileID: 8457106582707378200}
   - component: {fileID: 8457106582707378203}
   - component: {fileID: 8457106582707378202}
+  - component: {fileID: 5261349004615653542}
   m_Layer: 5
   m_Name: ExShopWindow
   m_TagString: Untagged
@@ -877,6 +878,21 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 55
+--- !u!114 &5261349004615653542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8457106582707378197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d01055aa489f784789c09b03cef491d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemParent: {fileID: 349045312957942464}
+  itemIdList: 
+  exShopItemList: []
 --- !u!1 &8457106584171185702
 GameObject:
   m_ObjectHideFlags: 0

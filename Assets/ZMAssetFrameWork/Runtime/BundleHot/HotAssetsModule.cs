@@ -363,7 +363,7 @@ namespace ZMAssetFrameWork
             {
                 OnDownLoadABConfigListener?.Invoke(abName);
                 //如果下载成功需要及时去加载配置文件
-                // TODO
+                AssetBundleManager.Instance.LoadAssetBundleConfig(CurBundleModuleEnum);
             }
             else
             {

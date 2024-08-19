@@ -85,7 +85,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7262370905376005369}
   m_Layer: 5
-  m_Name: Root
+  m_Name: GameItemParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -269,6 +269,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2404454047181789491}
+  - component: {fileID: 3632155102718884074}
   m_Layer: 5
   m_Name: Loading
   m_TagString: Untagged
@@ -296,6 +297,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 80, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &3632155102718884074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8939356760952410355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec76aa0aee4ba8242903acf14d912525, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationSpeed: 170
 --- !u!1 &9072150493790854911
 GameObject:
   m_ObjectHideFlags: 0
@@ -305,6 +319,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8684513255701250426}
+  - component: {fileID: 8862013926577855788}
   m_Layer: 5
   m_Name: ExShopItem
   m_TagString: Untagged
@@ -335,3 +350,17 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &8862013926577855788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9072150493790854911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec444e4ba8e8a3e409bc1170a6ac9394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameItemParent: {fileID: 7262370905376005369}
+  loadingObj: {fileID: 8939356760952410355}

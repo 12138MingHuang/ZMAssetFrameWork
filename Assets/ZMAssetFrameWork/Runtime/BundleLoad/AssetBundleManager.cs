@@ -79,6 +79,11 @@ namespace ZMAssetFrameWork
     public class AssetBundleManager : Singleton<AssetBundleManager>
     {
         /// <summary>
+        /// 已经加载的资源模块
+        /// </summary>
+        private List<BundleModuleEnum> _alreadyLoadModuleList = new List<BundleModuleEnum>();
+        
+        /// <summary>
         /// 所有模块的AssetBundle的资源对象字典
         /// </summary>
         private Dictionary<uint, BundleItem> _allBundleAssetDic = new Dictionary<uint, BundleItem>();
@@ -141,6 +146,12 @@ namespace ZMAssetFrameWork
         {
             try
             {
+                if(_alreadyLoadModuleList.Contains(bundleModuleEnum))
+                {
+                    Debug.Log("AssetBundleManager:LoadAssetBundleConfig:当前模块的AssetBundle配置文件已经加载过了");
+                    return;
+                }
+                
                 //获取当前模块配置文件所在路径
                 if (GeneratorBundleConfigPath(bundleModuleEnum))
                 {
@@ -181,6 +192,7 @@ namespace ZMAssetFrameWork
                     }
                     //释放AssetBundle配置
                     bundleConfig.Unload(false);
+                    _alreadyLoadModuleList.Add(bundleModuleEnum);
                 }
                 else
                 {

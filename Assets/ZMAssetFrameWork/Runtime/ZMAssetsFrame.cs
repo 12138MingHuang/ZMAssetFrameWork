@@ -30,6 +30,7 @@ namespace ZMAssetFrameWork
             _hotAssets = new HotAssetsManager();
             _decompressAssets = new AssetsDecompressManager();
             _resource = new ResourceManager();
+            _resource.Initlizate();
         }
 
         public void Update()
