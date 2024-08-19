@@ -56,6 +56,7 @@ public class GameModeItem : MonoBehaviour
         }
         else
         {
+            ZMAssetsFrame.Release(transform.parent.parent.parent.parent.gameObject);
             //如果不需要更新，就直接加载对应模块资源进入游戏
             ZMAssetsFrame.ClearResourcesAssets(true);
             ZMAssetsFrame.Instantiate("Assets/BuildBundleDemo/" + gameType + "/Prefab/" + gameType + "Window", null, Vector3.zero, Vector3.one, Quaternion.identity);

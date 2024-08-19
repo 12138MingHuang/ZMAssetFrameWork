@@ -224,6 +224,10 @@ namespace ZMAssetFrameWork
             {
                 Directory.CreateDirectory(HotAssetsSavePath);
             }
+            if (File.Exists(_localHotAssetsManifestPath))
+            {
+                _localHotAssetsManifest = JsonConvert.DeserializeObject<HotAssetsManifest>(File.ReadAllText(_localHotAssetsManifestPath));
+            }
             AssetsMaxSizeM = 0;
             foreach (HotFileInfo item in serverHotAssetsPatch.hotAssetsList)
             {
@@ -231,13 +235,38 @@ namespace ZMAssetFrameWork
                 string localFilePath = HotAssetsSavePath + item.abName;
                 _allHotAssetsList.Add(item);
                 //如果本地文件不存在，或者本地文件与服务端不一致，就需要热更
-                if (!File.Exists(localFilePath) || item.md5 != MD5.GetMd5FromFile(localFilePath))
+                string localMD5 = GetLocalFileMD5ByBundleName(item.abName);
+                if (!File.Exists(localFilePath) || item.md5 != localMD5)
                 {
                     _needDownLoadAssetsList.Add(item);
                     AssetsMaxSizeM += item.size / 1024.0f;
                 }
+                // if (!File.Exists(localFilePath) || item.md5 != MD5.GetMd5FromFile(localFilePath))
+                // {
+                //     _needDownLoadAssetsList.Add(item);
+                //     AssetsMaxSizeM += item.size / 1024.0f;
+                // }
             }
             return _needDownLoadAssetsList.Count > 0;
+        }
+
+        /// <summary>
+        /// 获取本地文件MD5
+        /// </summary>
+        /// <param name="bundleName">ab包名称</param>
+        /// <returns>MD5字符串</returns>
+        private string GetLocalFileMD5ByBundleName(string bundleName)
+        {
+            if (_localHotAssetsManifest != null && _localHotAssetsManifest.hotAssetsPatchList.Count > 0)
+            {
+                HotAssetsPatch localPatch = _localHotAssetsManifest.hotAssetsPatchList[_localHotAssetsManifest.hotAssetsPatchList.Count - 1];
+                foreach (HotFileInfo item in localPatch.hotAssetsList)
+                {
+                    if(string.Equals(bundleName, item.abName))
+                        return item.md5;
+                }
+            }
+            return "";
         }
 
         /// <summary>
@@ -267,9 +296,14 @@ namespace ZMAssetFrameWork
             //获取服务端热更补丁的最后一个补丁
             HotAssetsPatch serverHotAssetsPatch = _serverHotAssetsManifest.hotAssetsPatchList[_serverHotAssetsManifest.hotAssetsPatchList.Count - 1];
 
+            // if (localHotAssetsPatch != null && serverHotAssetsPatch != null)
+            // {
+            //     return localHotAssetsPatch.patchVersion != serverHotAssetsPatch.patchVersion;
+            // }
             if (localHotAssetsPatch != null && serverHotAssetsPatch != null)
             {
-                return localHotAssetsPatch.patchVersion != serverHotAssetsPatch.patchVersion;
+                if(localHotAssetsPatch.patchVersion != serverHotAssetsPatch.patchVersion)
+                    return true;
             }
 
             return serverHotAssetsPatch != null;

@@ -175,7 +175,8 @@ namespace ZMAssetFrameWork
                         }
                         else
                         {
-                            Debug.LogError("AssetBundleManager:LoadAssetBundleConfig:当前模块的AssetBundle配置文件中有重复的AssetBundle信息: " + item.bundleName);
+                            Debug.Log("AssetBundleManager:LoadAssetBundleConfig:当前模块的AssetBundle配置文件中有重复的AssetBundle信息: " + item.bundleName);
+                            // Debug.LogError("AssetBundleManager:LoadAssetBundleConfig:当前模块的AssetBundle配置文件中有重复的AssetBundle信息: " + item.bundleName);
                         }
                     }
                     //释放AssetBundle配置
