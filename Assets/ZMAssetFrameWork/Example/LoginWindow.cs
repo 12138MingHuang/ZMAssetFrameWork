@@ -20,6 +20,7 @@ public class LoginWindow : MonoBehaviour
     public void OnLoginButtonClick()
     {
         ZMAssetsFrame.Release(gameObject);
+        ZMAssetsFrame.ClearResourcesAssets(true);
         //弹出大厅弹窗
         ZMAssetsFrame.Instantiate("Assets/BuildBundleDemo/Hall/Prefab/HallWindow", null, Vector3.zero, Vector3.one, Quaternion.identity);
     }

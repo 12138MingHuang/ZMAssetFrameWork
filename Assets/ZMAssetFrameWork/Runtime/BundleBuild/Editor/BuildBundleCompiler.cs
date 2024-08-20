@@ -452,6 +452,9 @@ namespace ZMAssetFrameWork
             writer.Write(json);
             writer.Dispose();
             writer.Close();
+            
+            AssetDatabase.Refresh();
+            
             //修改AssetBundle配置文件的AssetBundleName
             AssetImporter assetImporter = AssetImporter.GetAtPath(bundleConfigPath.Replace(Application.dataPath, "Assets"));
             if (assetImporter != null)

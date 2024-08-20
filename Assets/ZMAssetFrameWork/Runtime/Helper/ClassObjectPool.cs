@@ -16,6 +16,14 @@ namespace ZMAssetFrameWork
         protected int maxCount = 0;
         
         /// <summary>
+        /// 当前缓存对象个数
+        /// </summary>
+        public int PoolCount
+        {
+            get { return pool.Count; }
+        }
+        
+        /// <summary>
         /// 类对象池构造函数
         /// </summary>
         /// <param name="maxCount">最大缓存个数</param>

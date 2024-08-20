@@ -10,9 +10,12 @@ public class ExShopItem : MonoBehaviour
     public GameObject loadingObj;
 
     private GameObject _itemObj;
+    
+    private int _itemId;
 
     public void SetData(int itemId)
     {
+        _itemId = itemId;
         ZMAssetsFrame.InstantiateAndLoad("Assets/BuildBundleDemo/GameItem/" + itemId + "/" + itemId, LoadItemObjComplete, ItemObjLoading);
     }
     
@@ -27,6 +30,10 @@ public class ExShopItem : MonoBehaviour
             itemObj.transform.localScale = Vector3.one;
             itemObj.transform.localRotation = Quaternion.identity;
             _itemObj = itemObj;
+        }
+        else
+        {
+            Debug.Log("item obj is Null:" + _itemId);
         }
     }
 

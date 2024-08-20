@@ -13,13 +13,10 @@ public class ExShopWindow : MonoBehaviour
     
     private List<ExShopItem> exShopItemList = new List<ExShopItem>();
 
-    private void Awake()
+    private void OnEnable()
     {
-        ZMAssetsFrame.HotAssets(BundleModuleEnum.GameItem, null, null, null);
-    }
-
-    private void Start()
-    {
+        itemIdList.Clear();
+        exShopItemList.Clear();
         for (int i = 0; i < 15; i++)
         {
             itemIdList.Add(i + 6000 + 1);
@@ -36,11 +33,16 @@ public class ExShopWindow : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         foreach (ExShopItem exShopItem in exShopItemList)
         {
             exShopItem.Release();
         }
+    }
+    
+    public void OnCloseButtonClick()
+    {
+        ZMAssetsFrame.Release(gameObject);
     }
 }

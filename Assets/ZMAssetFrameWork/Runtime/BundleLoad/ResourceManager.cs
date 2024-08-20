@@ -180,7 +180,7 @@ namespace ZMAssetFrameWork
                 Debug.LogError("Recycle obj failed,obj is GameObject.Instantiate create");
                 return;
             }
-
+            Debug.Log("Release Obj ins：" + insId + "  path:" + cacheObject.path);
             if (isDestroy)
             {
                 GameObject.Destroy(obj);
@@ -202,17 +202,20 @@ namespace ZMAssetFrameWork
                     _cacheObjectPool.Recycle(cacheObject);
                 }
                 //如果该对象不在对象池，或者已经全部释放了，就卸载该对象AssetBundle的资源占用
-                if(objectPoolList == null || objectPoolList.Count == 0)
+                else if(objectPoolList == null || objectPoolList.Count == 0)
                 {
                     BundleItem bundleItem = null;
                     if (_alReadyAssetDic.TryGetValue(cacheObject.crc, out bundleItem))
                     {
                         AssetBundleManager.Instance.ReleaseAssets(bundleItem, true);
+                        _alReadyAssetDic.Remove(cacheObject.crc);
                     }
                     else
                     {
                         Debug.LogError("_alreadyLoadAssetsDic not find BundleItem Path: " + cacheObject.path);
                     }
+                    cacheObject.Release();
+                    _cacheObjectPool.Recycle(cacheObject);
                 }
             }
             else
@@ -639,7 +642,7 @@ namespace ZMAssetFrameWork
             GameObject cacheObj = GetCacheObjFormPools(Crc32.GetCrc32(path));
             if (cacheObj != null)
             {
-                loadAsync?.Invoke(null, cacheObj, null);
+                loadAsync?.Invoke(cacheObj, param1, param2);
                 return;
             }
             //获取异步加载任务唯一id
@@ -655,6 +658,7 @@ namespace ZMAssetFrameWork
                     {
                         _asyncLoadingTaskList.Remove(guid);
                         GameObject newObj = Instantiate(path, (GameObject)obj, null);
+                        loadAsync?.Invoke(newObj, param1, param2);
                     }
                 }
                 else
@@ -682,13 +686,14 @@ namespace ZMAssetFrameWork
             long loadId = -1;
             if(cacheObj != null)
             {
-                loadAsync?.Invoke(null, cacheObj, null);
+                loadAsync?.Invoke(cacheObj, param1, param2);
+                return loadId;
             }
             GameObject obj = Instantiate(path, null, Vector3.zero, Vector3.one, Quaternion.identity);
             
             if(obj != null)
             {
-                loadAsync?.Invoke(null, param1, param2);
+                loadAsync?.Invoke(obj, param1, param2);
             }
             else
             {
@@ -790,6 +795,7 @@ namespace ZMAssetFrameWork
             if(bundleItem.obj != null)
             {
                 loadFinish?.Invoke(bundleItem.obj as T);
+                return;
             }
             
             //声明新对象

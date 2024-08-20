@@ -426,8 +426,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
+      - m_Target: {fileID: 5261349004615653542}
+        m_TargetAssemblyTypeName: ExShopWindow, Assembly-CSharp
         m_MethodName: OnCloseButtonClick
         m_Mode: 1
         m_Arguments:
@@ -891,8 +891,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemParent: {fileID: 349045312957942464}
-  itemIdList: 
-  exShopItemList: []
 --- !u!1 &8457106584171185702
 GameObject:
   m_ObjectHideFlags: 0

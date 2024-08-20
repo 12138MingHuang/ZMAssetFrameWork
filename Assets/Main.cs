@@ -21,5 +21,6 @@ public class Main : MonoBehaviour
     public void StartGame()
     {
         ZMAssetsFrame.Instantiate("Assets/BuildBundleDemo/Hall/Prefab/LoginWindow", null, Vector3.zero, Vector3.one, Quaternion.identity);
+        ZMAssetsFrame.HotAssets(BundleModuleEnum.GameItem, null, null, null);
     }
 }

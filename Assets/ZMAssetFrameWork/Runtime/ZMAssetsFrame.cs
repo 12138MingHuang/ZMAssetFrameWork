@@ -26,6 +26,7 @@ namespace ZMAssetFrameWork
         {
             GameObject recycleObjectRoot = new GameObject("RecycleObjRoot");
             RecycleObjRoot = recycleObjectRoot.transform;
+            recycleObjectRoot.SetActive(false);
             DontDestroyOnLoad(recycleObjectRoot);
             _hotAssets = new HotAssetsManager();
             _decompressAssets = new AssetsDecompressManager();
