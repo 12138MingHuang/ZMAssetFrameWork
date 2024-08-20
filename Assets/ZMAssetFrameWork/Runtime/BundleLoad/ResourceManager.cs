@@ -265,7 +265,7 @@ namespace ZMAssetFrameWork
         public Sprite LoadSprite(string path)
         {
             if(!path.EndsWith(".png")) path += ".png";
-            return Resources.Load<Sprite>(path);
+            return LoadResource<Sprite>(path);
         }
         
         /// <summary>
@@ -276,7 +276,7 @@ namespace ZMAssetFrameWork
         public Texture LoadTexture(string path)
         {
             if(!path.EndsWith(".jpg")) path += ".jpg";
-            return Resources.Load<Texture>(path);
+            return LoadResource<Texture>(path);
         }
         
         /// <summary>

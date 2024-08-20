@@ -21,7 +21,9 @@ MonoBehaviour:
     - Assets/BuildBundleDemo/Hall/Prefab
     rootFolderPathArr:
     - Assets/BuildBundleDemo/Hall/Textures
-    signFolderPathArr: []
+    signFolderPathArr:
+    - abName: HallData
+      bundlePath: Assets/BuildBundleDemo/Hall/Data
   - bundleId: 0
     moduleName: ShuangKou
     isBuild: 0
