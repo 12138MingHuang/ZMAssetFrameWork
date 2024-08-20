@@ -111,7 +111,7 @@ namespace ZMAssetFrameWork
 
                         while (size > 0)
                         {
-                            fileStream.Write(buffer, 0, buffer.Length);
+                            fileStream.Write(buffer, 0, size);
                             size = stream.Read(buffer, 0, buffer.Length);
                             //1mb=1024kb 1kb=1024字节
                             _downLoadSizeKb += size;
