@@ -63,7 +63,7 @@ public class BuildBundleWindow : BundleBehaviour
             }
 
             //打包图标绘制
-            GUI.DrawTexture(new Rect(130, 13, 30, 30), EditorGUIUtility.IconContent(curPlatfam).image);
+            GUI.DrawTexture(new Rect(130, 13, 30, 30), EditorGUIUtility.IconContent("BuildSettings.Android").image);
             //内嵌资源图标绘制
             GUI.DrawTexture(new Rect(545, 13, 30, 30), EditorGUIUtility.IconContent("SceneSet icon".Trim()).image);
         }
