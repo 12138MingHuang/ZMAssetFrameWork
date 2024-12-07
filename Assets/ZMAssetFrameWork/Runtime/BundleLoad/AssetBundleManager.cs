@@ -49,6 +49,11 @@ namespace ZMAssetFrameWork
         /// 通过AssetBundle加载的对象
         /// </summary>
         public UnityEngine.Object obj;
+        
+        /// <summary>
+        /// 通过AssetBundle加载出的对象数组
+        /// </summary>
+        public UnityEngine.Object[] objArr;
     }
 
     /// <summary>
@@ -387,14 +392,22 @@ namespace ZMAssetFrameWork
                 {
                     assetItem.obj = null;
                 }
+                if (assetItem.objArr!=null)
+                {
+                    assetItem.objArr = null;
+                }
 
                 ReleaseAssetBundle(assetItem, unLoad);
 
-                foreach (string bundleName in assetItem.bundleDependenceList)
+                if (assetItem.bundleDependenceList != null)
                 {
-                    //根据内存引用计数释放AssetBundle
-                    ReleaseAssetBundle(null, unLoad, bundleName);
+                    foreach (string bundleName in assetItem.bundleDependenceList)
+                    {
+                        //根据内存引用计数释放AssetBundle
+                        ReleaseAssetBundle(null, unLoad, bundleName);
+                    }
                 }
+                
             }
             else
             {

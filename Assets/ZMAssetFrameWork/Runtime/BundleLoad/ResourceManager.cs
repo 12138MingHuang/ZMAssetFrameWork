@@ -854,6 +854,68 @@ namespace ZMAssetFrameWork
         }
         
         /// <summary>
+        /// 同步加载所有资源，外部直接调用，仅仅加载不需要实例化的资源
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public T[] LoadAllResource<T>(string path) where T : UnityEngine.Object
+        {
+
+            if (string.IsNullOrEmpty(path))
+            {
+                Debug.LogError("path is Null , return null!");
+                return null;
+            }
+            uint crc = Crc32.GetCrc32(path);
+            //从缓存中获取我们Bundleitem
+            BundleItem item = GeCacheItemFormAssetDic(crc);
+
+            //如果BundleItem中的对象已经加载过，就直接返回该对象
+            if (item.obj != null)
+            {
+                return item.objArr as T[];
+            }
+
+            //声明新对象
+            UnityEngine.Object[] objArr = null;
+#if UNITY_EDITOR
+            if (BundleSettings.Instance.loadAssetType == LoadAssetEnum.Editor)
+            {
+                objArr = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path);
+            }
+#endif
+            if (objArr == null)
+            {
+                //加载该路径对应的AssetBundle
+                item = AssetBundleManager.Instance.LoadAssetBundle(crc);
+                if (item != null)
+                {
+                    if (item.assetBundle != null)
+                    {
+                        objArr = item.objArr != null ? item.objArr : item.assetBundle.LoadAllAssets<T>();
+                    }
+                    else
+                    {
+                        Debug.LogError("item.AssetBundle Is Null!");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("item is null ...Path:" + path);
+                    return null;
+                }
+            }
+
+            item.objArr = objArr;
+            item.path = path;
+            //缓存已经加载过的资源
+            _alReadyAssetDic.Add(crc, item);
+
+            return objArr as T[];
+        }
+        
+        /// <summary>
         /// 从缓存中获取BundleItem
         /// </summary>
         /// <param name="crc">crc</param>
