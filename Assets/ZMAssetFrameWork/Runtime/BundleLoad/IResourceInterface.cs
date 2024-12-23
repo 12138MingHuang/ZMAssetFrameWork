@@ -33,7 +33,11 @@ namespace ZMAssetFrameWork
         
         TextAsset LoadTextAsset(string path);
         
+        T LoadScriptableObject<T>(string path) where T : UnityEngine.Object;
+        
         Sprite LoadAtlasSprite(string atlasPath, string spriteName);
+        
+        Sprite LoadPNGAtlasSprite(string atlasPath, string spriteName);
         
         long LoadTextureAsync(string path, Action<Texture, object> loadAsync, object param = null);
         

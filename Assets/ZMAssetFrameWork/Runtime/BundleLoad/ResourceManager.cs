@@ -113,6 +113,11 @@ namespace ZMAssetFrameWork
         /// 等待加载的资源列表
         /// </summary>
         private List<HotFileInfo> _waitLoadAssetsList = new List<HotFileInfo>();
+        
+        /// <summary>
+        /// 所有图集图片的集合
+        /// </summary>
+        protected readonly Dictionary<string, UnityEngine.Object[]> allAssetObjectDic = new Dictionary<string, UnityEngine.Object[]>();
 
         public void Initlizate()
         {
@@ -300,6 +305,44 @@ namespace ZMAssetFrameWork
         }
         
         /// <summary>
+        /// 加载可编写脚本对象
+        /// </summary>
+        /// <typeparam name="T">ScriptableObject类型</typeparam>
+        /// <param name="path">绝对路径</param>
+        /// <returns> ScriptableObject </returns>
+        public T LoadScriptableObject<T>(string path) where T : UnityEngine.Object
+        {
+            return LoadResource<T>(path);
+        }
+        
+        /// <summary>
+        /// 加载TexturePackerSheet图集
+        /// </summary>
+        /// <param name="path"></param>
+        public Sprite LoadPNGAtlasSprite(string path, string name)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+            if (!path.EndsWith(".png"))
+            {
+                path += ".png";
+            }
+            UnityEngine.Object[] objectArr = null;
+            //优先从缓存中读取
+            if (allAssetObjectDic.TryGetValue(path,out objectArr)&& objectArr!=null)
+            {
+                return LoadSpriteFormAtlas(objectArr, name);
+            }
+            //通过Asset Bundle加载该文件中的所有资源
+            UnityEngine.Object[] objects = LoadAllResource<UnityEngine.Object>(path);
+            //缓存至图集列表中
+            allAssetObjectDic.Add(path, objects);
+            return LoadSpriteFormAtlas(objects, name);
+        }
+        
+        /// <summary>
         /// 从图集中加载指定名称的图片
         /// </summary>
         /// <param name="atlasPath">图集路径</param>
@@ -331,6 +374,25 @@ namespace ZMAssetFrameWork
                 return sprite;
             }
             Debug.LogError("Not find sprite Name:" + spriteName);
+            return null;
+        }
+        
+        /// <summary>
+        /// 从图集中加载图片
+        /// </summary>
+        /// <param name="objects"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private Sprite LoadSpriteFormAtlas(UnityEngine.Object[] objects, string name)
+        {
+            for (int i = 0; i < objects.Length; i++)
+            {
+                if (string.Equals(name, objects[i].name))
+                {
+                    return objects[i] as Sprite;
+                }
+            }
+            Debug.LogError("没有找到名字为" + name + "的图片 请检查图片名称是否正确！");
             return null;
         }
         
@@ -467,6 +529,7 @@ namespace ZMAssetFrameWork
             //清理列表
             _loadObjectCallBackDic.Clear();
             _alReadyAssetDic.Clear();
+            allAssetObjectDic.Clear();
             //释放未使用的资源(未使用的资源值得是 没有被引用的资源)
             Resources.UnloadUnusedAssets();
             //触发GC垃圾回收

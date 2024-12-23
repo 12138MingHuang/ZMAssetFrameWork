@@ -148,6 +148,17 @@ namespace ZMAssetFrameWork
         }
         
         /// <summary>
+        /// 加载可编写脚本对象
+        /// </summary>
+        /// <typeparam name="T">ScriptableObject类型</typeparam>
+        /// <param name="path">绝对路径</param>
+        /// <returns> ScriptableObject </returns>
+        public static T LoadScriptableObject<T>(string path) where T : UnityEngine.Object
+        {
+            return Instance._resource.LoadScriptableObject<T>(path);
+        }
+        
+        /// <summary>
         /// 从图集中加载指定名称的图片
         /// </summary>
         /// <param name="atlasPath">图集路径</param>
@@ -156,6 +167,17 @@ namespace ZMAssetFrameWork
         public static Sprite LoadAtlasSprite(string atlasPath, string spriteName)
         {
            return Instance._resource.LoadAtlasSprite(atlasPath, spriteName);
+        }
+        
+        /// <summary>
+        /// 从(TexturePacker)图集中加载指定的图片
+        /// </summary>
+        /// <param name="atlasPath"></param>
+        /// <param name="spriteName"></param>
+        /// <returns></returns>
+        public static Sprite LoadPNGAtlasSprite(string atlasPath, string spriteName)
+        {
+            return Instance._resource.LoadPNGAtlasSprite(atlasPath, spriteName);
         }
 
         /// <summary>
